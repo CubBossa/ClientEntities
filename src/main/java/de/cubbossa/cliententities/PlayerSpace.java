@@ -8,8 +8,10 @@ import com.google.common.collect.HashBiMap;
 import de.cubbossa.cliententities.entity.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
+import org.bukkit.material.MaterialData;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -134,6 +136,12 @@ public class PlayerSpace implements Closeable {
     if (entities.remove(id) != null) {
       freeEntityIds.add(id);
     }
+  }
+
+  public FallingBlock spawnFallingBlock(Location location, BlockData blockData) {
+    FallingBlock fallingBlock = spawn(location, FallingBlock.class);
+    ((ClientFallingBlock) fallingBlock).setBlockData(blockData);
+    return fallingBlock;
   }
 
   public <E extends Entity> E spawn(Location location, Class<E> type) {

@@ -24,6 +24,10 @@ public class ClientFallingBlock extends ClientEntity implements FallingBlock {
     return SpigotConversionUtil.fromBukkitBlockData(blockData).getGlobalId();
   }
 
+  public void setBlockData(BlockData blockData) {
+    this.blockData = setMeta(this.blockData, blockData);
+  }
+
   @NotNull
   @Override
   public Material getMaterial() {
