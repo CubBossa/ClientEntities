@@ -33,6 +33,7 @@ DisplayText x = playerSpace.spawn(myLocation, DisplayText.class)
 - Snowball
 - Item
 - Egg
+- EnderPearl
 - ArmorStand
 - FallingBlock
 

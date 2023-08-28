@@ -34,6 +34,31 @@
                     <target>17</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.github.retrooper.packetevents</pattern>
+                            <shadedPattern>de.cubbossa.cliententities.lib.packetevents.api</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>io.github.retrooper.packetevents</pattern>
+                            <shadedPattern>de.cubbossa.cliententities.lib.packetevents.impl</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

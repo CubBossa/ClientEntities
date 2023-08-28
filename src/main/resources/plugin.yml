@@ -1,0 +1,8 @@
+name: ClientEntities
+main: de.cubbossa.cliententities.TestPlugin
+author: CubBossa
+version: 1.0
+api-version: 1.18
+
+commands:
+  cliententities:

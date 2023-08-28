@@ -31,7 +31,13 @@ public class PlayerSpace implements Closeable {
     classConversion.put(BlockDisplay.class, ClientBlockDisplay.class);
     classConversion.put(TextDisplay.class, ClientTextDisplay.class);
     classConversion.put(Interaction.class, ClientInteraction.class);
+    classConversion.put(EnderPearl.class, ClientEnderPearl.class);
+    classConversion.put(Firework.class, ClientFireWork.class);
+    classConversion.put(EnderSignal.class, ClientEyeOfEnder.class);
+    classConversion.put(ItemDisplay.class, ClientItemDisplay.class);
     classConversion.put(Egg.class, ClientEgg.class);
+    classConversion.put(ThrownExpBottle.class, ClientThrownExpBottle.class);
+    classConversion.put(ThrownPotion.class, ClientThrownPotion.class);
     classConversion.put(FallingBlock.class, ClientFallingBlock.class);
     classConversion.put(Snowball.class, ClientSnowball.class);
   }
