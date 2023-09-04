@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.util.Vector3f;
 import de.cubbossa.cliententities.PlayerSpace;
 import lombok.Getter;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @Getter
-public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
+public class ClientArmorStand extends ClientLivingEntity {
 
   private boolean small = false;
   private boolean basePlate = true;
@@ -32,162 +33,112 @@ public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
   private EulerAngle rightLegPose = new EulerAngle(0, 0, 0);
   private EulerAngle leftLegPose = new EulerAngle(0, 0, 0);
 
-  private Map<EquipmentSlot, LockType> equipmentSlotLockTypeMap;
-
-
   public ClientArmorStand(PlayerSpace playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.ARMOR_STAND);
-    equipmentSlotLockTypeMap = new HashMap<>();
+  }
+
+  @Override
+  public @NotNull EntityCategory getCategory() {
+    return EntityCategory.NONE;
   }
 
   @NotNull
-  @Override
   public ItemStack getItemInHand() {
     return equipment.getItemInMainHand();
   }
 
-  @Override
   public void setItemInHand(@Nullable ItemStack item) {
     equipment.setItemInMainHand(item);
   }
 
   @NotNull
-  @Override
   public ItemStack getBoots() {
     return equipment.getBoots();
   }
 
-  @Override
   public void setBoots(@Nullable ItemStack item) {
     equipment.setBoots(item);
   }
 
   @NotNull
-  @Override
   public ItemStack getLeggings() {
     return equipment.getLeggings();
   }
 
-  @Override
   public void setLeggings(@Nullable ItemStack item) {
     equipment.setLeggings(item);
   }
 
   @NotNull
-  @Override
   public ItemStack getChestplate() {
     return equipment.getChestplate();
   }
 
-  @Override
   public void setChestplate(@Nullable ItemStack item) {
     equipment.setChestplate(item);
   }
 
   @NotNull
-  @Override
   public ItemStack getHelmet() {
     return equipment.getHelmet();
   }
 
-  @Override
   public void setHelmet(@Nullable ItemStack item) {
     equipment.setHelmet(item);
   }
 
-  @Override
   public void setBodyPose(@NotNull EulerAngle pose) {
-    bodyPose = pose;
-    metaChanged = true;
+    this.bodyPose = setMeta(this.bodyPose, pose);
   }
 
-  @Override
   public void setLeftArmPose(@NotNull EulerAngle pose) {
-    leftArmPose = pose;
-    metaChanged = true;
+    this.leftArmPose = setMeta(this.leftArmPose, pose);
   }
 
-  @Override
   public void setRightArmPose(@NotNull EulerAngle pose) {
-    rightArmPose = pose;
-    metaChanged = true;
+    this.rightArmPose = setMeta(this.rightArmPose, pose);
   }
 
-  @Override
   public void setLeftLegPose(@NotNull EulerAngle pose) {
-    leftLegPose = pose;
-    metaChanged = true;
+    this.leftLegPose = setMeta(this.leftLegPose, pose);
   }
 
-  @Override
   public void setRightLegPose(@NotNull EulerAngle pose) {
-    rightLegPose = pose;
-    metaChanged = true;
+    this.rightLegPose = setMeta(this.rightLegPose, pose);
   }
 
-  @Override
   public void setHeadPose(@NotNull EulerAngle pose) {
-    headPose = pose;
-    metaChanged = true;
+    this.headPose = setMeta(this.headPose, pose);
   }
 
-  @Override
   public boolean hasArms() {
     return arms;
   }
 
-  @Override
   public void setArms(boolean arms) {
-    this.arms = arms;
-    metaChanged = true;
+    this.arms = setMeta(this.arms, arms);
   }
 
-  @Override
   public void setSmall(boolean small) {
-    this.small = small;
-    metaChanged = true;
+    this.small = setMeta(this.small, small);
   }
 
-  @Override
   public void setMarker(boolean marker) {
-    this.marker = marker;
-    metaChanged = true;
+    this.marker = setMeta(this.marker, marker);
   }
 
-  @Override
   public boolean hasBasePlate() {
     return basePlate;
   }
 
-  @Override
   public void setBasePlate(boolean basePlate) {
-    this.basePlate = basePlate;
-    metaChanged = true;
+    this.basePlate = setMeta(this.basePlate, basePlate);
   }
 
-  @Override
   public void setVisible(boolean visible) {
-    this.visible = visible;
-    metaChanged = true;
+    this.visible = setMeta(this.visible, visible);
   }
 
-  @Override
-  public void addEquipmentLock(@NotNull EquipmentSlot slot, @NotNull ArmorStand.LockType lockType) {
-    equipmentSlotLockTypeMap.put(slot, lockType);
-  }
-
-  @Override
-  public void removeEquipmentLock(@NotNull EquipmentSlot slot, @NotNull ArmorStand.LockType lockType) {
-    equipmentSlotLockTypeMap.remove(slot);
-  }
-
-  @Override
-  public boolean hasEquipmentLock(@NotNull EquipmentSlot slot, @NotNull ArmorStand.LockType lockType) {
-    return equipmentSlotLockTypeMap.get(slot).equals(lockType);
-  }
-
-
-  @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     byte mask = (byte)

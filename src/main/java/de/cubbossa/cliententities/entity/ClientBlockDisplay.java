@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 @Getter
-public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
+public class ClientBlockDisplay extends ClientDisplay {
 
   BlockData block = Material.LIME_CONCRETE.createBlockData();
 
@@ -22,13 +22,8 @@ public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
     super(playerSpace, entityId, EntityType.BLOCK_DISPLAY);
   }
 
-  @Override
   public void setBlock(@NotNull BlockData block) {
-    if (this.block.equals(block)) {
-      return;
-    }
-    this.block = block;
-    metaChanged = true;
+    this.block = setMeta(this.block, block);
   }
 
   @Override

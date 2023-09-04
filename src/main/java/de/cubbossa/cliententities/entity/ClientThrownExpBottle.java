@@ -6,7 +6,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ThrownExpBottle;
 import org.bukkit.inventory.ItemStack;
 
-public class ClientThrownExpBottle extends ClientThrownItemProjectile implements ThrownExpBottle {
+public class ClientThrownExpBottle extends ClientThrownItemProjectile {
 
     public ClientThrownExpBottle(PlayerSpace playerSpace, int entityId) {
         super(playerSpace, entityId, EntityType.THROWN_EXP_BOTTLE, new ItemStack(Material.EXPERIENCE_BOTTLE));

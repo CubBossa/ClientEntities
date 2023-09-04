@@ -6,27 +6,17 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
 import com.github.retrooper.packetevents.protocol.player.EquipmentSlot;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerAttachEntity;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import de.cubbossa.cliententities.ClientEntityEquipment;
-import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
 import de.cubbossa.cliententities.PlayerSpace;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.block.Block;
+import org.bukkit.*;
 import org.bukkit.entity.*;
-import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,415 +25,142 @@ import java.util.*;
 
 @Getter
 @Setter
-public class ClientLivingEntity extends ClientDamageable implements LivingEntity {
+public abstract class ClientLivingEntity extends ClientDamageable {
 
   EntityEquipment equipment = new ClientEntityEquipment(this);
+  @Nullable Location bedLocation = null;
+  @Nullable Color potionEffectColor = null;
+  boolean potionEffectAmbient = false;
+  int arrowsInBody = 0;
+  int beeStingersInBody = 0;
+  boolean isHandActive = false;
+  boolean activeHandMainHand = true;
 
   // change list
   boolean equipmentChanged = false;
+  @Nullable Entity leashHolder = null;
 
   public ClientLivingEntity(PlayerSpace playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 
-  @Override
-  public double getEyeHeight() {
-    return 0;
-  }
-
-  @Override
-  public double getEyeHeight(boolean ignorePose) {
-    return 0;
-  }
-
-  @NotNull
-  @Override
-  public Location getEyeLocation() {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public List<Block> getLineOfSight(@Nullable Set<Material> transparent, int maxDistance) {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Block getTargetBlock(@Nullable Set<Material> transparent, int maxDistance) {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public List<Block> getLastTwoTargetBlocks(@Nullable Set<Material> transparent, int maxDistance) {
-    return null;
-  }
-
-  @Nullable
-  @Override
-  public Block getTargetBlockExact(int maxDistance) {
-    return null;
-  }
-
-  @Nullable
-  @Override
-  public Block getTargetBlockExact(int maxDistance, @NotNull FluidCollisionMode fluidCollisionMode) {
-    return null;
-  }
-
-  @Nullable
-  @Override
-  public RayTraceResult rayTraceBlocks(double maxDistance) {
-    return null;
-  }
-
-  @Nullable
-  @Override
-  public RayTraceResult rayTraceBlocks(double maxDistance, @NotNull FluidCollisionMode fluidCollisionMode) {
-    return null;
-  }
-
-  @Override
-  public int getRemainingAir() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setRemainingAir(int ticks) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getMaximumAir() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setMaximumAir(int ticks) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getArrowCooldown() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setArrowCooldown(int ticks) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getArrowsInBody() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
   public void setArrowsInBody(int count) {
-
+    this.arrowsInBody = setMeta(this.arrowsInBody, count);
   }
 
-  @Override
-  public int getMaximumNoDamageTicks() {
-    return 0;
+  public void setBeeStingersInBody(int count) {
+    this.beeStingersInBody = setMeta(this.beeStingersInBody, count);
   }
 
-  @Override
-  public void setMaximumNoDamageTicks(int ticks) {
-
+  public void setPotionEffectColor(@Nullable Color color) {
+    this.potionEffectColor = setMeta(this.potionEffectColor, color);
   }
 
-  @Override
-  public double getLastDamage() {
-    return 0;
+  public void setPotionEffectAmbient(boolean ambient) {
+    this.potionEffectAmbient = setMeta(this.potionEffectAmbient, ambient);
   }
 
-  @Override
-  public void setLastDamage(double damage) {
-
+  public void setPotionEffect(@Nullable PotionEffect effect) {
+    setPotionEffectColor(effect == null ? null : effect.getType().getColor());
+    setPotionEffectAmbient(effect != null && effect.isAmbient());
   }
 
-  @Override
-  public int getNoDamageTicks() {
-    return 0;
-  }
-
-  @Override
-  public void setNoDamageTicks(int ticks) {
-
-  }
-
-  @Override
-  public int getNoActionTicks() {
-    return 0;
-  }
-
-  @Override
-  public void setNoActionTicks(int i) {
-
-  }
-
-  @Nullable
-  @Override
-  public Player getKiller() {
-    return null;
-  }
-
-  @Override
-  public boolean addPotionEffect(@NotNull PotionEffect effect) {
-    return false;
-  }
-
-  @Override
-  public boolean addPotionEffect(@NotNull PotionEffect effect, boolean force) {
-    return false;
-  }
-
-  @Override
-  public boolean addPotionEffects(@NotNull Collection<PotionEffect> effects) {
-    return false;
-  }
-
-  @Override
-  public boolean hasPotionEffect(@NotNull PotionEffectType type) {
-    return false;
-  }
-
-  @Nullable
-  @Override
-  public PotionEffect getPotionEffect(@NotNull PotionEffectType type) {
-    return null;
-  }
-
-  @Override
-  public void removePotionEffect(@NotNull PotionEffectType type) {
-
-  }
-
-  @NotNull
-  @Override
-  public Collection<PotionEffect> getActivePotionEffects() {
-    return null;
-  }
-
-  @Override
-  public boolean hasLineOfSight(@NotNull Entity other) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean getRemoveWhenFarAway() {
-    return false;
-  }
-
-  @Override
-  public void setRemoveWhenFarAway(boolean remove) {
-
-  }
-
-  @Override
-  public void setCanPickupItems(boolean pickup) {
-
-  }
-
-  @Override
-  public boolean getCanPickupItems() {
-    return false;
-  }
-
-  @Override
   public boolean isLeashed() {
-    return false;
+    return leashHolder != null;
   }
 
-  @NotNull
-  @Override
-  public Entity getLeashHolder() throws IllegalStateException {
-    return null;
-  }
-
-  @Override
   public boolean setLeashHolder(@Nullable Entity holder) {
-    return false;
+    leashHolder = holder;
+    runnableEffects.add(player -> {
+      PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+          new WrapperPlayServerAttachEntity(entityId, holder == null ? -1 : holder.getEntityId(), true)
+      );
+    });
+    return true;
   }
 
-  @Override
   public boolean isGliding() {
-    return false;
+    return isElytraFlying();
   }
 
-  @Override
   public void setGliding(boolean gliding) {
-
+    this.elytraFlying = setMeta(this.elytraFlying, gliding);
   }
 
   @Override
   public boolean isSwimming() {
-    return false;
+    return pose == Pose.SWIMMING;
   }
 
   @Override
   public void setSwimming(boolean swimming) {
-
+    pose = setMeta(pose, Pose.SWIMMING);
   }
 
-  @Override
   public boolean isRiptiding() {
-    return false;
+    return pose == Pose.SPIN_ATTACK;
   }
 
-  @Override
   public boolean isSleeping() {
-    return false;
+    return pose == Pose.SLEEPING;
   }
 
-  @Override
-  public boolean isClimbing() {
-    return false;
+  public boolean sleep(@NotNull Location location) {
+    teleport(location);
+    setPose(Pose.SLEEPING);
+    bedLocation = location;
+    return true;
   }
 
-  @Override
-  public void setAI(boolean ai) {
-    throw new ClientEntityMethodNotSupportedException();
+  public void wakeup() {
+    if (pose == Pose.SLEEPING) {
+      setPose(Pose.STANDING);
+    }
   }
 
-  @Override
-  public boolean hasAI() {
-    throw new ClientEntityMethodNotSupportedException();
+  public @Nullable Location getBedLocation() {
+    return bedLocation;
   }
 
-  @Override
-  public void attack(@NotNull Entity target) {
-
-  }
-
-  @Override
   public void swingMainHand() {
-
+    playAnimation(Animation.SWING_MAIN_ARM);
   }
 
-  @Override
   public void swingOffHand() {
-
+    playAnimation(Animation.SWING_OFFHAND);
   }
 
-  @Override
   public void playHurtAnimation(float v) {
-
-  }
-
-  @Override
-  public void setCollidable(boolean collidable) {
-
-  }
-
-  @Override
-  public boolean isCollidable() {
-    return false;
+    runnableEffects.add(player -> {
+      //PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+      //    new WrapperPlayServerHurtAnimation(v));
+    });
   }
 
   @NotNull
-  @Override
-  public Set<UUID> getCollidableExemptions() {
-    return null;
-  }
+  public abstract EntityCategory getCategory();
 
-  @Nullable
-  @Override
-  public <T> T getMemory(@NotNull MemoryKey<T> memoryKey) {
-    return null;
-  }
-
-  @Override
-  public <T> void setMemory(@NotNull MemoryKey<T> memoryKey, @Nullable T memoryValue) {
-
-  }
-
-  @Nullable
-  @Override
-  public Sound getHurtSound() {
-    return null;
-  }
-
-  @Nullable
-  @Override
-  public Sound getDeathSound() {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Sound getFallDamageSound(int fallHeight) {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Sound getFallDamageSoundSmall() {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Sound getFallDamageSoundBig() {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Sound getDrinkingSound(@NotNull ItemStack itemStack) {
-    return null;
-  }
-
-  @NotNull
-  @Override
-  public Sound getEatingSound(@NotNull ItemStack itemStack) {
-    return null;
-  }
-
-  @Override
-  public boolean canBreatheUnderwater() {
-    return false;
-  }
-
-  @NotNull
-  @Override
-  public EntityCategory getCategory() {
-    return null;
-  }
-
-  @Override
   public void setInvisible(boolean invisible) {
-
+    super.setVisible(!invisible);
   }
 
-  @Override
   public boolean isInvisible() {
-    return false;
-  }
-
-  @Nullable
-  @Override
-  public AttributeInstance getAttribute(@NotNull Attribute attribute) {
-    return null;
+    return !visible;
   }
 
   @NotNull
-  @Override
   public <T extends Projectile> T launchProjectile(@NotNull Class<? extends T> projectile) {
-    return null;
+    return null; //TODO
   }
 
   @NotNull
-  @Override
   public <T extends Projectile> T launchProjectile(@NotNull Class<? extends T> projectile, @Nullable Vector velocity) {
-    return null;
+    return null; //TODO
   }
 
   @Override
-  public void update(Collection<Player> viewers) {
-    super.update(viewers);
+  public void announce(Collection<Player> viewers) {
+    super.announce(viewers);
     PacketEventsAPI<?> api = PacketEvents.getAPI();
     for (Player player : viewers) {
       if (equipmentChanged) {
@@ -465,12 +182,29 @@ public class ClientLivingEntity extends ClientDamageable implements LivingEntity
   @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    data.add(new EntityData(9, EntityDataTypes.FLOAT, (float) getHealth()));
-    data.add(new EntityData(10, EntityDataTypes.INT, 0));
-    data.add(new EntityData(11, EntityDataTypes.BOOLEAN, false));
-    data.add(new EntityData(12, EntityDataTypes.INT, 0));
-    data.add(new EntityData(13, EntityDataTypes.INT, 0));
-    data.add(new EntityData(14, EntityDataTypes.OPTIONAL_BLOCK_POSITION, Optional.empty()));
+    if (isHandActive) {
+      data.add(new EntityData(8, EntityDataTypes.BYTE, (byte) (
+          0x1 | (activeHandMainHand ? 0 : 0x2) | (isRiptiding() ? 0x4 : 0)
+          )));
+    }
+    if (getHealth() != 1) {
+      data.add(new EntityData(9, EntityDataTypes.FLOAT, (float) getHealth()));
+    }
+    if (potionEffectColor != null) {
+      data.add(new EntityData(10, EntityDataTypes.INT, potionEffectColor.asRGB()));
+    }
+    if (potionEffectAmbient) {
+      data.add(new EntityData(11, EntityDataTypes.BOOLEAN, true));
+    }
+    if (arrowsInBody != 0) {
+      data.add(new EntityData(12, EntityDataTypes.INT, arrowsInBody));
+    }
+    if (beeStingersInBody != 0) {
+      data.add(new EntityData(13, EntityDataTypes.INT, beeStingersInBody));
+    }
+    if (bedLocation != null) {
+      data.add(new EntityData(14, EntityDataTypes.OPTIONAL_BLOCK_POSITION, SpigotConversionUtil.fromBukkitLocation(bedLocation)));
+    }
     return data;
   }
 }

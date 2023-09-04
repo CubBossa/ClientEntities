@@ -11,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
-import org.bukkit.material.MaterialData;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -42,6 +41,29 @@ public class PlayerSpace implements Closeable {
     classConversion.put(Snowball.class, ClientSnowball.class);
   }
 
+  public static PlayerSpace createTicked() {
+    return createTicked(50);
+  }
+
+  public static PlayerSpace createTicked(int ms) {
+    Timer timer = new Timer();
+    PlayerSpace playerSpace = new PlayerSpace(Collections.emptyList()) {
+      @Override
+      public void close() throws IOException {
+        super.close();
+        timer.cancel();
+      }
+    };
+    timer.scheduleAtFixedRate(new TimerTask() {
+      @Override
+      public void run() {
+        playerSpace.announceEntityRemovals();
+        playerSpace.announce();
+      }
+    }, ms, ms);
+    return playerSpace;
+  }
+
   public static PlayerSpace create() {
     return new PlayerSpace(Collections.emptyList());
   }
@@ -60,7 +82,7 @@ public class PlayerSpace implements Closeable {
   ClientEntityListener clientEntityListener;
 
   Collection<UUID> players;
-  Map<Integer, Entity> entities;
+  Map<Integer, ClientEntity> entities;
   Map<Class<? extends Event>, Map<UUID, Consumer<Event>>> listeners;
 
   private PlayerSpace(Collection<UUID> players) {
@@ -80,7 +102,7 @@ public class PlayerSpace implements Closeable {
   /**
    * Reserves an ID for a client entity.
    * All client entities IDs are created by decrementing a start value (10^5).
-   * If an entity becomes released via {@link #releaseEntity(Entity)}, the ID will be added to a pool.
+   * If an entity becomes released via {@link #releaseEntity(ClientEntity)}, the ID will be added to a pool.
    * As long as the pool still contains IDs they will be preferred to the decrement.
    *
    * @return A new ID for a client entity.
@@ -103,12 +125,10 @@ public class PlayerSpace implements Closeable {
     players.add(player.getUniqueId());
     Collection<Player> singletonList = Collections.singletonList(player);
     entities.values().stream()
-        .filter(e -> e instanceof ClientEntity)
-        .map(e -> (ClientEntity) e)
         .filter(e -> !e.isAliveChanged())
         .forEach(clientEntity -> {
           clientEntity.setAliveChanged(true);
-          clientEntity.update(singletonList);
+          clientEntity.announce(singletonList);
           clientEntity.setAliveChanged(false);
         });
   }
@@ -122,7 +142,7 @@ public class PlayerSpace implements Closeable {
     }
   }
 
-  public @Nullable Entity getEntity(int id) {
+  public @Nullable ClientEntity getEntity(int id) {
     return entities.get(id);
   }
 
@@ -130,7 +150,7 @@ public class PlayerSpace implements Closeable {
    * Removes the entity from the map and frees the id.
    * The id can then be used for a new entity later.
    */
-  public void releaseEntity(Entity entity) {
+  public void releaseEntity(ClientEntity entity) {
     releaseEntity(entity.getEntityId());
   }
 
@@ -150,14 +170,14 @@ public class PlayerSpace implements Closeable {
     return fallingBlock;
   }
 
-  public <E extends Entity> E spawn(Location location, Class<E> type) {
-    Class<?> mapping = classConversion.get(type);
+  public <E extends Entity, C extends ClientEntity> C spawn(Location location, Class<E> type) {
+    Class<C> mapping = (Class<C>) classConversion.get(type);
     if (mapping == null) {
       throw new IllegalArgumentException("No client entity implementation for entity type " + type + ".");
     }
     try {
       Constructor<?> constructor = mapping.getConstructor(PlayerSpace.class, int.class);
-      E entity = (E) constructor.newInstance(this, claimId());
+      C entity = (C) constructor.newInstance(this, claimId());
       entities.put(entity.getEntityId(), entity);
       entity.teleport(location);
       return entity;
@@ -186,11 +206,9 @@ public class PlayerSpace implements Closeable {
 
   public void announceEntityRemovals() {
     int[] ids = entities.values().stream()
-        .filter(e -> e instanceof ClientEntity)
-        .map(e -> (ClientEntity) e)
         .filter(e -> e.isAliveChanged() && e.isDead())
         .peek(e -> e.setAliveChanged(false))
-        .mapToInt(Entity::getEntityId)
+        .mapToInt(ClientEntity::getEntityId)
         .toArray();
 
     PacketEventsAPI<?> api = PacketEvents.getAPI();
@@ -210,14 +228,14 @@ public class PlayerSpace implements Closeable {
     Collection<Player> c = getPlayers();
     entities.values().stream()
         .map(entity -> (UntickedEntity) entity)
-        .forEach(entity -> entity.update(c));
+        .forEach(entity -> entity.announce(c));
   }
 
   public void announce(Entity e) {
     if (!(e instanceof UntickedEntity untickedEntity)) {
       throw new IllegalArgumentException("Entity is no client side entity: " + e.getEntityId());
     }
-    untickedEntity.update(getPlayers());
+    untickedEntity.announce(getPlayers());
   }
 
   public Collection<Player> getPlayers() {

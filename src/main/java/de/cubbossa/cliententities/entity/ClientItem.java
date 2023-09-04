@@ -6,6 +6,7 @@ import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
 import de.cubbossa.cliententities.PlayerSpace;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Getter
-public class ClientItem extends ClientEntity implements Item {
+public class ClientItem extends ClientEntity {
 
   ItemStack itemStack;
 
@@ -24,51 +25,20 @@ public class ClientItem extends ClientEntity implements Item {
     super(playerSpace, entityId, EntityType.DROPPED_ITEM);
   }
 
-  @Override
   public void setItemStack(@NotNull ItemStack itemStack) {
     this.itemStack = setMeta(this.itemStack, itemStack);
   }
 
-  @Override
-  public int getPickupDelay() {
-    throw new ClientEntityMethodNotSupportedException();
+  public void pickup(ClientEntity entity) {
+    //TODO
   }
 
-  @Override
-  public void setPickupDelay(int i) {
-    throw new ClientEntityMethodNotSupportedException();
+  public void pickup(Entity entity) {
+
   }
 
-  @Override
-  public void setUnlimitedLifetime(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
+  private void pickup(int entity) {
 
-  @Override
-  public boolean isUnlimitedLifetime() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setOwner(@Nullable UUID uuid) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public UUID getOwner() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setThrower(@Nullable UUID uuid) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public UUID getThrower() {
-    throw new ClientEntityMethodNotSupportedException();
   }
 
   @Override

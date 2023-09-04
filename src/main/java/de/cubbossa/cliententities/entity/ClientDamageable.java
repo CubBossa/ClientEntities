@@ -11,34 +11,28 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @Setter
-public class ClientDamageable extends ClientEntity implements Damageable {
+public class ClientDamageable extends ClientEntity {
 
   private double maxHealth;
   private double health;
-  private double absorptionAmount;
 
   public ClientDamageable(PlayerSpace playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 
-  @Override
   public void damage(double amount) {
     health -= amount;
     if (health <= 0) {
+      // TODO death animation
       remove();
     }
   }
 
-  @Override
   public void damage(double amount, @Nullable Entity source) {
-    health -= amount;
-    if (health <= 0) {
-      remove();
-    }
+    damage(amount);
   }
 
-  @Override
   public void resetMaxHealth() {
-    throw new ClientEntityMethodNotSupportedException();
+    this.health = this.maxHealth;
   }
 }

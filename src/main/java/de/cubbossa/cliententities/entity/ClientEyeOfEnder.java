@@ -10,13 +10,15 @@ import org.bukkit.entity.EnderSignal;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.Metadatable;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 @Getter
-public class ClientEyeOfEnder extends ClientEntity implements EnderSignal {
+public class ClientEyeOfEnder extends ClientEntity {
 
+    Location targetLocation = location;
     ItemStack item = null;
 
     public ClientEyeOfEnder(PlayerSpace playerSpace, int entityId) {
@@ -32,39 +34,15 @@ public class ClientEyeOfEnder extends ClientEntity implements EnderSignal {
         return data;
     }
 
-    @Override
     public void setItem(ItemStack item) {
         this.item = setMeta(this.item, item);
     }
 
-    @NotNull
-    @Override
-    public Location getTargetLocation() {
-        return null;
-    }
-
-    @Override
     public void setTargetLocation(@NotNull Location location) {
-
-    }
-
-    @Override
-    public boolean getDropItem() {
-        throw new ClientEntityMethodNotSupportedException();
-    }
-
-    @Override
-    public void setDropItem(boolean b) {
-        throw new ClientEntityMethodNotSupportedException();
-    }
-
-    @Override
-    public int getDespawnTimer() {
-        throw new ClientEntityMethodNotSupportedException();
-    }
-
-    @Override
-    public void setDespawnTimer(int i) {
-        throw new ClientEntityMethodNotSupportedException();
+        this.targetLocation = location;
+        this.velocity = this.location.clone().subtract(targetLocation).toVector()
+            .multiply(new Vector(1, 0, 1))
+            .normalize().multiply(0.5)
+            .add(new Vector(0, 8, 0));
     }
 }

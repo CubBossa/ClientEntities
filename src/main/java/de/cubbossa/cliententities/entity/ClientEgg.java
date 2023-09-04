@@ -6,7 +6,7 @@ import org.bukkit.entity.Egg;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
-public class ClientEgg extends ClientThrownItemProjectile implements Egg {
+public class ClientEgg extends ClientThrownItemProjectile {
 
   public ClientEgg(PlayerSpace playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.EGG, new ItemStack(Material.EGG));

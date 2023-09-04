@@ -20,13 +20,13 @@ import java.util.List;
 import java.util.Objects;
 
 @Getter
-public class ClientDisplay extends ClientEntity implements Display {
+public class ClientDisplay extends ClientEntity {
 
   int interpolationDelay = 0;
   int interpolationDuration = 0;
   Transformation transformation = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(1, 1, 1), new AxisAngle4f());
-  Billboard billboard = Billboard.FIXED;
-  @Nullable Brightness brightness = null;
+  Display.Billboard billboard = Display.Billboard.FIXED;
+  @Nullable Display.Brightness brightness = null;
   float viewRange = 1;
   float shadowRadius = 0;
   float shadowStrength = 1;
@@ -38,7 +38,6 @@ public class ClientDisplay extends ClientEntity implements Display {
     super(playerSpace, entityId, entityType);
   }
 
-  @Override
   public void setTransformation(@NotNull Transformation transformation) {
     if (this.transformation.equals(transformation)) {
       return;
@@ -47,7 +46,6 @@ public class ClientDisplay extends ClientEntity implements Display {
     metaChanged = true;
   }
 
-  @Override
   public void setTransformationMatrix(@NotNull Matrix4f transformationMatrix) {
     transformationMatrix.getTranslation(this.transformation.getTranslation());
     transformationMatrix.getScale(this.transformation.getScale());
@@ -55,94 +53,44 @@ public class ClientDisplay extends ClientEntity implements Display {
     metaChanged = true;
   }
 
-  @Override
   public void setInterpolationDuration(int duration) {
-    if (this.interpolationDuration == duration) {
-      return;
-    }
-    this.interpolationDuration = duration;
-    metaChanged = true;
+    this.interpolationDuration = setMeta(this.interpolationDuration, duration);
   }
 
-  @Override
   public void setViewRange(float range) {
-    if (this.viewRange == range) {
-      return;
-    }
-    this.viewRange = range;
-    metaChanged = true;
+    this.viewRange = setMeta(this.viewRange, range);
   }
 
-  @Override
   public void setShadowRadius(float radius) {
-    if (this.shadowRadius == radius) {
-      return;
-    }
-    this.shadowRadius = radius;
-    metaChanged = true;
+    this.shadowRadius = setMeta(this.shadowRadius, radius);
   }
 
-  @Override
   public void setShadowStrength(float strength) {
-    if (this.shadowStrength == strength) {
-      return;
-    }
-    this.shadowStrength = strength;
-    metaChanged = true;
+    this.shadowStrength = setMeta(this.shadowStrength, strength);
   }
 
-  @Override
   public void setDisplayWidth(float width) {
-    if (this.displayWidth == width) {
-      return;
-    }
-    this.displayWidth = width;
-    metaChanged = true;
+    this.displayWidth = setMeta(this.displayWidth, width);
   }
 
-  @Override
   public void setDisplayHeight(float height) {
-    if (this.displayHeight == height) {
-      return;
-    }
-    this.displayHeight = height;
-    metaChanged = true;
+    this.displayHeight = setMeta(this.displayHeight, height);
   }
 
-  @Override
   public void setInterpolationDelay(int ticks) {
-    if (this.interpolationDelay == ticks) {
-      return;
-    }
-    this.interpolationDelay = ticks;
-    metaChanged = true;
+    this.interpolationDelay = setMeta(this.interpolationDelay, ticks);
   }
 
-  @Override
   public void setBillboard(@NotNull Display.Billboard billboard) {
-    if (this.billboard == billboard) {
-      return;
-    }
-    this.billboard = billboard;
-    metaChanged = true;
+    this.billboard = setMeta(this.billboard, billboard);
   }
 
-  @Override
   public void setGlowColorOverride(@Nullable Color color) {
-    if (Objects.equals(this.glowColorOverride, color)) {
-      return;
-    }
-    this.glowColorOverride = color;
-    metaChanged = true;
+    this.glowColorOverride = setMeta(this.glowColorOverride, color);
   }
 
-  @Override
   public void setBrightness(@Nullable Display.Brightness brightness) {
-    if (Objects.equals(this.brightness, brightness)) {
-      return;
-    }
-    this.brightness = brightness;
-    metaChanged = true;
+    this.brightness = setMeta(this.brightness, brightness);
   }
 
   @Override
@@ -162,7 +110,7 @@ public class ClientDisplay extends ClientEntity implements Display {
     }
     data.add(new EntityData(12, EntityDataTypes.QUATERNION, convert(transformation.getLeftRotation())));
     data.add(new EntityData(13, EntityDataTypes.QUATERNION, convert(transformation.getRightRotation())));
-    if (billboard != Billboard.FIXED) {
+    if (billboard != Display.Billboard.FIXED) {
       data.add(new EntityData(14, EntityDataTypes.BYTE, (byte) billboard.ordinal()));
     }
     if (brightness != null) {

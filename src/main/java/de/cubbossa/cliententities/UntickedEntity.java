@@ -6,5 +6,5 @@ import java.util.Collection;
 
 public interface UntickedEntity {
 
-  void update(Collection<Player> viewers);
+  void announce(Collection<Player> viewers);
 }

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Getter
-public class ClientFireWork extends ClientEntity implements Firework {
+public class ClientFireWork extends ClientEntity {
 
   ItemStack fireWorkInfo = null;
   LivingEntity attachedTo = null;
@@ -50,7 +50,6 @@ public class ClientFireWork extends ClientEntity implements Firework {
   }
 
   @NotNull
-  @Override
   public FireworkMeta getFireworkMeta() {
     if (fireWorkInfo == null) {
       fireWorkInfo = new ItemStack(Material.FIREWORK_ROCKET);
@@ -65,7 +64,6 @@ public class ClientFireWork extends ClientEntity implements Firework {
     return meta.clone();
   }
 
-  @Override
   public void setFireworkMeta(@NotNull FireworkMeta fireworkMeta) {
     if (fireWorkInfo == null) {
       fireWorkInfo = new ItemStack(Material.FIREWORK_ROCKET);
@@ -78,61 +76,17 @@ public class ClientFireWork extends ClientEntity implements Firework {
     }
   }
 
-  @Override
   public boolean setAttachedTo(@Nullable LivingEntity livingEntity) {
     this.attachedTo = setMeta(this.attachedTo, livingEntity);
     return true;
   }
 
-  @Override
-  public boolean setLife(int i) {
-    return false;
-  }
-
-  @Override
-  public int getLife() {
-    return 0;
-  }
-
-  @Override
-  public boolean setMaxLife(int i) {
-    return false;
-  }
-
-  @Override
-  public int getMaxLife() {
-    return 0;
-  }
-
-  @Override
   public void detonate() {
     playEffect(EntityEffect.FIREWORK_EXPLODE);
     detonated = true;
   }
 
-  @Override
   public void setShotAtAngle(boolean b) {
     this.shotAtAngle = setMeta(this.shotAtAngle, b);
-  }
-
-  @Nullable
-  @Override
-  public ProjectileSource getShooter() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setShooter(@Nullable ProjectileSource projectileSource) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean doesBounce() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setBounce(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
   }
 }

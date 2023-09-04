@@ -14,10 +14,10 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Getter
-public class ClientItemDisplay extends ClientDisplay implements ItemDisplay {
+public class ClientItemDisplay extends ClientDisplay {
 
     private ItemStack itemStack = null;
-    private ItemDisplayTransform itemDisplayTransform = ItemDisplayTransform.NONE;
+    private ItemDisplay.ItemDisplayTransform itemDisplayTransform = ItemDisplay.ItemDisplayTransform.NONE;
 
     public ClientItemDisplay(PlayerSpace playerSpace, int entityId, EntityType entityType) {
         super(playerSpace, entityId, entityType);
@@ -29,18 +29,16 @@ public class ClientItemDisplay extends ClientDisplay implements ItemDisplay {
         if (itemStack != null) {
             data.add(new EntityData(22, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(itemStack)));
         }
-        if (itemDisplayTransform != ItemDisplayTransform.NONE) {
+        if (itemDisplayTransform != ItemDisplay.ItemDisplayTransform.NONE) {
             data.add(new EntityData(23, EntityDataTypes.BYTE, (byte) itemDisplayTransform.ordinal()));
         }
         return data;
     }
 
-    @Override
     public void setItemStack(@Nullable ItemStack itemStack) {
         this.itemStack = setMeta(this.itemStack, itemStack);
     }
 
-    @Override
     public void setItemDisplayTransform(@NotNull ItemDisplay.ItemDisplayTransform itemDisplayTransform) {
         this.itemDisplayTransform = setMeta(this.itemDisplayTransform, itemDisplayTransform);
     }

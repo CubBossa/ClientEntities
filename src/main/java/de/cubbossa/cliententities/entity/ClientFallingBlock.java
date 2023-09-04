@@ -11,7 +11,7 @@ import org.bukkit.entity.FallingBlock;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public class ClientFallingBlock extends ClientEntity implements FallingBlock {
+public class ClientFallingBlock extends ClientEntity {
 
   BlockData blockData = Material.SAND.createBlockData();
 
@@ -29,58 +29,7 @@ public class ClientFallingBlock extends ClientEntity implements FallingBlock {
   }
 
   @NotNull
-  @Override
   public Material getMaterial() {
     return blockData.getMaterial();
-  }
-
-  @Override
-  public boolean getDropItem() {
-    return false;
-  }
-
-  @Override
-  public void setDropItem(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean getCancelDrop() {
-    return true;
-  }
-
-  @Override
-  public void setCancelDrop(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean canHurtEntities() {
-    return false;
-  }
-
-  @Override
-  public void setHurtEntities(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public float getDamagePerBlock() {
-    return 0;
-  }
-
-  @Override
-  public void setDamagePerBlock(float v) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getMaxDamage() {
-    return 0;
-  }
-
-  @Override
-  public void setMaxDamage(int i) {
-    throw new ClientEntityMethodNotSupportedException();
   }
 }

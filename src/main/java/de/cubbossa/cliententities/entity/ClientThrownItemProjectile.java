@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Getter
-public class ClientThrownItemProjectile extends ClientEntity implements ThrowableProjectile {
+public class ClientThrownItemProjectile extends ClientEntity {
 
   ItemStack item;
 
@@ -19,29 +19,7 @@ public class ClientThrownItemProjectile extends ClientEntity implements Throwabl
     this.item = stack;
   }
 
-  @Override
   public void setItem(@NotNull ItemStack itemStack) {
-
-  }
-
-  @Nullable
-  @Override
-  public ProjectileSource getShooter() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setShooter(@Nullable ProjectileSource projectileSource) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean doesBounce() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setBounce(boolean b) {
-    throw new ClientEntityMethodNotSupportedException();
+    this.item = setMeta(this.item, itemStack);
   }
 }

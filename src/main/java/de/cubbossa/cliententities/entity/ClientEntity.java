@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.util.UUIDUtil;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
@@ -15,18 +16,9 @@ import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.*;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Consumer;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +28,7 @@ import java.util.*;
 @Getter
 @Setter
 
-public class ClientEntity implements Entity, UntickedEntity {
+public class ClientEntity implements UntickedEntity {
 
   static final GsonComponentSerializer GSON = GsonComponentSerializer.gson();
 
@@ -46,6 +38,7 @@ public class ClientEntity implements Entity, UntickedEntity {
   final PlayerSpace playerSpace;
 
   boolean alive = true;
+  Location previousLocation = null;
   Location location = new Location(null, 0, 0, 0);
   Vector velocity = new Vector(0, 0, 0);
   double height = 0;
@@ -56,12 +49,12 @@ public class ClientEntity implements Entity, UntickedEntity {
   boolean swimming = false;
   boolean visible = true;
   boolean glowing = false;
-  boolean flying = false;
+  boolean elytraFlying = false;
   int airTicks = 300;
   boolean silent = true;
   boolean gravity = true;
   Pose pose = Pose.STANDING;
-  int frozenTicks = 0;
+  boolean frozen = false;
 
   boolean invulnerable = true;
 
@@ -74,6 +67,7 @@ public class ClientEntity implements Entity, UntickedEntity {
   boolean velocityChanged = false;
   boolean metaChanged = false;
   List<Byte> statusEffects = new LinkedList<>();
+  List<Consumer<Player>> runnableEffects = new LinkedList<>();
 
   public ClientEntity(PlayerSpace playerSpace, int entityId, EntityType entityType) {
     this.playerSpace = playerSpace;
@@ -86,7 +80,7 @@ public class ClientEntity implements Entity, UntickedEntity {
   }
 
   @Override
-  public void update(Collection<Player> viewers) {
+  public void announce(Collection<Player> viewers) {
     for (Player player : viewers) {
       PacketEventsAPI<?> api = PacketEvents.getAPI();
 
@@ -106,6 +100,11 @@ public class ClientEntity implements Entity, UntickedEntity {
         statusEffects.forEach(id -> api.getPlayerManager().sendPacket(player, new WrapperPlayServerEntityStatus(entityId, id)));
         statusEffects.clear();
       }
+      // Play Sound Effects on Entity before it removal
+      if (!runnableEffects.isEmpty()) {
+        runnableEffects.forEach(c -> c.accept(player));
+        runnableEffects.clear();
+      }
       // Delete Entity
       if (aliveChanged && !alive) {
         api.getPlayerManager().sendPacket(player,
@@ -115,10 +114,40 @@ public class ClientEntity implements Entity, UntickedEntity {
         playerSpace.releaseEntity(this);
       }
       // Change location
-      if (locationChanged && location != null) {
-        api.getPlayerManager().sendPacket(player,
-            new WrapperPlayServerEntityTeleport(entityId, SpigotConversionUtil.fromBukkitLocation(location), true)
-        );
+      if (locationChanged && location != null && !location.equals(previousLocation)) {
+        if (location.toVector().equals(previousLocation.toVector())) {
+          api.getPlayerManager().sendPacket(player,
+              new WrapperPlayServerEntityRotation(entityId, location.getYaw(), location.getPitch(), true)
+          );
+        } else if (location.distanceSquared(previousLocation) < 64) {
+          if (location.getDirection().equals(previousLocation.getDirection())) {
+            api.getPlayerManager().sendPacket(player,
+                new WrapperPlayServerEntityRelativeMove(entityId,
+                    location.getX() - previousLocation.getX(),
+                    location.getY() - previousLocation.getY(),
+                    location.getZ() - previousLocation.getZ(),
+                    true
+                )
+            );
+          } else {
+            api.getPlayerManager().sendPacket(player,
+                new WrapperPlayServerEntityRelativeMoveAndRotation(entityId,
+                    location.getX() - previousLocation.getX(),
+                    location.getY() - previousLocation.getY(),
+                    location.getZ() - previousLocation.getZ(),
+                    location.getYaw(),
+                    location.getPitch(),
+                    true
+                )
+            );
+          }
+        } else {
+          api.getPlayerManager().sendPacket(player,
+              new WrapperPlayServerEntityTeleport(entityId, SpigotConversionUtil.fromBukkitLocation(location), true)
+          );
+        }
+
+        previousLocation = location;
         locationChanged = false;
       }
       // change velocity
@@ -154,7 +183,7 @@ public class ClientEntity implements Entity, UntickedEntity {
             | (swimming ? 0x10 : 0)
             | (!visible ? 0x20 : 0)
             | (glowing ? 0x40 : 0)
-            | (flying ? 0x80 : 0)
+            | (elytraFlying ? 0x80 : 0)
     );
     if (mask != 0) {
       data.add(new EntityData(0, EntityDataTypes.BYTE, mask));
@@ -175,8 +204,8 @@ public class ClientEntity implements Entity, UntickedEntity {
     if (pose != Pose.STANDING) {
       data.add(new EntityData(6, EntityDataTypes.ENTITY_POSE, pose));
     }
-    if (frozenTicks != 0) {
-      data.add(new EntityData(7, EntityDataTypes.INT, frozenTicks));
+    if (frozen) {
+      data.add(new EntityData(7, EntityDataTypes.INT, 1));
     }
     return data;
   }
@@ -202,13 +231,11 @@ public class ClientEntity implements Entity, UntickedEntity {
   }
 
   @NotNull
-  @Override
   public Location getLocation() {
     return location;
   }
 
   @Nullable
-  @Override
   public Location getLocation(@Nullable Location loc) {
     if (loc == null) {
       return null;
@@ -220,56 +247,34 @@ public class ClientEntity implements Entity, UntickedEntity {
   }
 
   @NotNull
-  @Override
-  public BoundingBox getBoundingBox() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean isOnGround() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean isInWater() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
   public World getWorld() {
     return getLocation().getWorld();
   }
 
-  @Override
   public void setRotation(float yaw, float pitch) {
     this.location.setYaw(yaw);
     this.location.setPitch(pitch);
     this.locationChanged = true;
   }
 
-  @Override
   public boolean teleport(@NotNull Location location) {
     this.location = location.clone();
     this.locationChanged = true;
     return true;
   }
 
-  @Override
   public boolean teleport(@NotNull Location location, @NotNull PlayerTeleportEvent.TeleportCause cause) {
     this.location = location.clone();
     this.locationChanged = true;
     return true;
   }
 
-  @Override
   public boolean teleport(@NotNull Entity destination) {
     this.location = destination.getLocation().clone();
     this.locationChanged = true;
     return true;
   }
 
-  @Override
   public boolean teleport(@NotNull Entity destination, @NotNull PlayerTeleportEvent.TeleportCause cause) {
     this.location = destination.getLocation().clone();
     this.locationChanged = true;
@@ -281,397 +286,157 @@ public class ClientEntity implements Entity, UntickedEntity {
     velocityChanged = true;
   }
 
-  @NotNull
-  @Override
-  public List<Entity> getNearbyEntities(double x, double y, double z) {
-    throw new ClientEntityMethodNotSupportedException();
+  public void playSound(Sound sound, SoundCategory category, float volume, float pitch) {
+    runnableEffects.add(player -> {
+      try {
+        com.github.retrooper.packetevents.protocol.sound.SoundCategory cat = com.github.retrooper.packetevents.protocol.sound.SoundCategory.valueOf(category.toString());
+        PacketEvents.getAPI().getPlayerManager().sendPacket(player, new WrapperPlayServerEntitySoundEffect(sound.ordinal(), cat, entityId, volume, pitch));
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+    });
   }
 
-  @Override
-  public int getFireTicks() {
-    return onFire ? 1 : 0;
+  enum Animation {
+    SWING_MAIN_ARM(0),
+    LEAVE_BED(2),
+    SWING_OFFHAND(3),
+    CRITICAL_EFFECT(4),
+    MAGIC_CRITICAL_EFFECT(5);
+
+    int id;
+
+    Animation(int id) {
+      this.id = id;
+    }
+
+    public int id() {
+      return id;
+    }
   }
 
-  @Override
-  public int getMaxFireTicks() {
-    throw new ClientEntityMethodNotSupportedException();
+  void playAnimation(Animation animation) {
+    runnableEffects.add(player -> {
+      PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+          new WrapperPlayServerEntityAnimation(entityId, WrapperPlayServerEntityAnimation.EntityAnimationType.getById(animation.id)));
+    });
   }
 
-  @Override
-  public void setFireTicks(int ticks) {
-    this.onFire = setMeta(this.onFire, ticks > 0);
-  }
-
-  @Override
   public void setVisualFire(boolean fire) {
     this.onFire = setMeta(this.onFire, fire);
   }
 
-  @Override
   public boolean isVisualFire() {
     return onFire;
   }
 
-  @Override
-  public int getFreezeTicks() {
-    return frozenTicks;
+  public boolean isVisualFreeze() {
+    return frozen;
   }
 
-  @Override
-  public int getMaxFreezeTicks() {
-    throw new ClientEntityMethodNotSupportedException();
+  public void setVisualFreeze(boolean frozen) {
+    this.frozen = setMeta(this.frozen, frozen);
   }
 
-  @Override
-  public void setFreezeTicks(int ticks) {
-    this.frozenTicks = setMeta(this.frozenTicks, ticks);
-  }
-
-  @Override
-  public boolean isFrozen() {
-    return frozenTicks > 0;
-  }
-
-  @Override
   public void remove() {
     alive = false;
     aliveChanged = true;
   }
 
-  @Override
   public boolean isDead() {
     return !alive;
   }
 
-  @Override
-  public boolean isValid() {
-    return true;
-  }
-
-  @Override
-  public void sendMessage(@NotNull String message) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void sendMessage(@NotNull String... messages) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void sendMessage(@Nullable UUID sender, @NotNull String message) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void sendMessage(@Nullable UUID sender, @NotNull String... messages) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public Server getServer() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public String getName() {
-    return customName == null ? getClass().getName() : GSON.serialize(customName);
-  }
-
-  @Override
-  public boolean isPersistent() {
-    return false;
-  }
-
-  @Override
-  public void setPersistent(boolean persistent) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
   @Nullable
-  @Override
   public Entity getPassenger() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
   public boolean setPassenger(@NotNull Entity passenger) {
     throw new ClientEntityMethodNotSupportedException();
   }
 
   @NotNull
-  @Override
   public List<Entity> getPassengers() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
   public boolean addPassenger(@NotNull Entity passenger) {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
   public boolean removePassenger(@NotNull Entity passenger) {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
   public boolean isEmpty() {
     return true;
   }
 
-  @Override
   public boolean eject() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
-  public float getFallDistance() {
-    return 0;
-  }
-
-  @Override
-  public void setFallDistance(float distance) {
-
-  }
-
-  @Override
-  public void setLastDamageCause(@Nullable EntityDamageEvent event) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public EntityDamageEvent getLastDamageCause() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getTicksLived() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setTicksLived(int value) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
   public void playEffect(@NotNull EntityEffect type) {
     statusEffects.add(type.getData());
   }
 
   @NotNull
-  @Override
   public Sound getSwimSound() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
   @NotNull
-  @Override
   public Sound getSwimSplashSound() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
   @NotNull
-  @Override
   public Sound getSwimHighSpeedSplashSound() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
-  @Override
   public boolean isInsideVehicle() {
     return false;
   }
 
-  @Override
   public boolean leaveVehicle() {
     throw new ClientEntityMethodNotSupportedException();
   }
 
   @Nullable
-  @Override
   public Entity getVehicle() {
     return null;
   }
 
-  @Override
   public void setCustomNameVisible(boolean flag) {
     this.setMeta(this.customNameVisible, flag);
   }
 
-  @Override
   public boolean isCustomNameVisible() {
     return customNameVisible;
   }
 
-  @Override
-  public void setVisibleByDefault(boolean visible) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean isVisibleByDefault() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public int getPortalCooldown() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setPortalCooldown(int cooldown) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
   @NotNull
-  @Override
-  public Set<String> getScoreboardTags() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean addScoreboardTag(@NotNull String tag) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean removeScoreboardTag(@NotNull String tag) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public PistonMoveReaction getPistonMoveReaction() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public BlockFace getFacing() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
   public Pose getPose() {
     return pose;
   }
 
   @NotNull
-  @Override
   public SpawnCategory getSpawnCategory() {
     return SpawnCategory.MISC;
   }
 
-  @NotNull
-  @Override
-  public Spigot spigot() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void setMetadata(@NotNull String metadataKey, @NotNull MetadataValue newMetadataValue) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public List<MetadataValue> getMetadata(@NotNull String metadataKey) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean hasMetadata(@NotNull String metadataKey) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void removeMetadata(@NotNull String metadataKey, @NotNull Plugin owningPlugin) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean isPermissionSet(@NotNull String name) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean isPermissionSet(@NotNull Permission perm) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean hasPermission(@NotNull String name) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public boolean hasPermission(@NotNull Permission perm) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public PermissionAttachment addAttachment(@NotNull Plugin plugin) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value, int ticks) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public PermissionAttachment addAttachment(@NotNull Plugin plugin, int ticks) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void removeAttachment(@NotNull PermissionAttachment attachment) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
-  public void recalculatePermissions() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public Set<PermissionAttachmentInfo> getEffectivePermissions() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Override
   public boolean hasGravity() {
     return gravity;
   }
 
-  @Override
-  public boolean isOp() {
-    throw new ClientEntityMethodNotSupportedException();
+  void lookAt(Location location) {
+    Location temp = location.clone().subtract(this.location);
+    setRotation(temp.getYaw(), temp.getPitch());
   }
 
-  @Override
-  public void setOp(boolean value) {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @NotNull
-  @Override
-  public PersistentDataContainer getPersistentDataContainer() {
-    throw new ClientEntityMethodNotSupportedException();
+  void playSound(Sound sound, SoundCategory category) {
+    playSound(sound, category, (float) (Math.random() * .2 + 0.9), (float) (Math.random() * 0.3 + 0.85));
   }
 }

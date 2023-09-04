@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 @Getter
-public class ClientInteraction extends ClientEntity implements Interaction {
+public class ClientInteraction extends ClientEntity {
 
   float interactionWidth = 1;
   float interactionHeight = 1;
@@ -22,43 +22,16 @@ public class ClientInteraction extends ClientEntity implements Interaction {
     super(playerSpace, entityId, EntityType.INTERACTION);
   }
 
-  @Override
   public void setInteractionWidth(float width) {
-    if (this.interactionWidth == width) {
-      return;
-    }
-    this.interactionWidth = width;
-    metaChanged = true;
+    this.interactionWidth = setMeta(this.interactionWidth, width);
   }
 
-  @Override
   public void setInteractionHeight(float height) {
-    if (this.interactionHeight == height) {
-      return;
-    }
-    this.interactionHeight = height;
-    metaChanged = true;
+    this.interactionHeight = setMeta(this.interactionHeight, height);
   }
 
-  @Override
   public void setResponsive(boolean response) {
-    if (this.responsive == response) {
-      return;
-    }
-    this.responsive = response;
-    metaChanged = true;
-  }
-
-  @Nullable
-  @Override
-  public PreviousInteraction getLastAttack() {
-    throw new ClientEntityMethodNotSupportedException();
-  }
-
-  @Nullable
-  @Override
-  public PreviousInteraction getLastInteraction() {
-    throw new ClientEntityMethodNotSupportedException();
+    this.responsive = setMeta(this.responsive, response);
   }
 
   @Override
