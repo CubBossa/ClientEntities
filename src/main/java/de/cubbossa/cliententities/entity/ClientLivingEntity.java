@@ -9,7 +9,7 @@ import com.github.retrooper.packetevents.protocol.player.EquipmentSlot;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerAttachEntity;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment;
 import de.cubbossa.cliententities.ClientEntityEquipment;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +40,7 @@ public abstract class ClientLivingEntity extends ClientDamageable {
   boolean equipmentChanged = false;
   @Nullable Entity leashHolder = null;
 
-  public ClientLivingEntity(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+  public ClientLivingEntity(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 

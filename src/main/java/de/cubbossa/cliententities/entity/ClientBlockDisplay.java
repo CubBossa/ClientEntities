@@ -2,12 +2,11 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +17,7 @@ public class ClientBlockDisplay extends ClientDisplay {
 
   BlockData block = Material.LIME_CONCRETE.createBlockData();
 
-  public ClientBlockDisplay(PlayerSpace playerSpace, int entityId) {
+  public ClientBlockDisplay(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.BLOCK_DISPLAY);
   }
 

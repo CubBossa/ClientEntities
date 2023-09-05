@@ -25,13 +25,12 @@ public class TestPlugin extends JavaPlugin implements Listener {
   public void onLoad() {
     PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this));
     PacketEvents.getAPI().load();
-
   }
 
   @Override
   public void onEnable() {
     PacketEvents.getAPI().init();
-    playerSpace = PlayerSpace.create();
+    playerSpace = PlayerSpace.builder().build();
     Bukkit.getPluginManager().registerEvents(this, this);
 
     getCommand("cliententities").setExecutor((sender, cmd, s, args) -> {

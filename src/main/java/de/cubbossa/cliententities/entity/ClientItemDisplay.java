@@ -2,7 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.entity.EntityType;
@@ -19,7 +19,7 @@ public class ClientItemDisplay extends ClientDisplay {
     private ItemStack itemStack = null;
     private ItemDisplay.ItemDisplayTransform itemDisplayTransform = ItemDisplay.ItemDisplayTransform.NONE;
 
-    public ClientItemDisplay(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+    public ClientItemDisplay(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
         super(playerSpace, entityId, entityType);
     }
 

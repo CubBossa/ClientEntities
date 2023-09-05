@@ -3,7 +3,7 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
@@ -17,7 +17,6 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.List;
-import java.util.Objects;
 
 @Getter
 public class ClientDisplay extends ClientEntity {
@@ -34,7 +33,7 @@ public class ClientDisplay extends ClientEntity {
   float displayHeight = 0;
   @Nullable Color glowColorOverride = null;
 
-  public ClientDisplay(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+  public ClientDisplay(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 

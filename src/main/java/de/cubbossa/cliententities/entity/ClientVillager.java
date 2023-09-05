@@ -3,7 +3,7 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import lombok.Getter;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
@@ -24,7 +24,7 @@ public class ClientVillager extends ClientAbstractVillager {
     Villager.Profession profession = Villager.Profession.NONE;
     int villagerLevel = 0;
 
-    public ClientVillager(PlayerSpace playerSpace, int entityId) {
+    public ClientVillager(PlayerSpaceImpl playerSpace, int entityId) {
         super(playerSpace, entityId, EntityType.VILLAGER);
     }
 

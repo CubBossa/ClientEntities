@@ -1,10 +1,15 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.PlayerSpace;
+import com.github.retrooper.packetevents.protocol.player.UserProfile;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import org.bukkit.GameMode;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MainHand;
@@ -12,6 +17,7 @@ import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +25,12 @@ import java.util.UUID;
 public class ClientPlayer extends ClientLivingEntity {
 
   boolean sneaking = false;
+  int pingDisplay = 0;
+  boolean displayInTab = false;
+  GameMode gameModeDisplay = GameMode.CREATIVE;
+  String name;
+  Component displayName;
+  Component tabName = Component.empty();
 
   MainHand mainHand = MainHand.RIGHT;
   boolean capeEnabled = true;
@@ -32,8 +44,69 @@ public class ClientPlayer extends ClientLivingEntity {
   @Nullable Entity leftShoulderEntity = null;
   @Nullable Entity rightShoulderEntity = null;
 
-  public ClientPlayer(PlayerSpace playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.PLAYER);
+  public ClientPlayer(PlayerSpaceImpl playerSpace, String name) {
+    super(playerSpace, -1, EntityType.PLAYER);
+    this.name = name;
+    this.displayName = Component.text(name);
+  }
+
+  @Override
+  void spawn(Player player) {
+    super.spawn(player);
+
+    WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+        new UserProfile(uniqueId, name),
+        displayInTab,
+        pingDisplay,
+        SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay),
+        displayName,
+        null
+    );
+    PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+        new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
+            WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER
+        ), data));
+  }
+
+  private void updatePlayerInfo() {
+    // TODO performance friendly way
+    runnableEffects.add(player -> {
+      WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+          new UserProfile(uniqueId, name),
+          displayInTab,
+          pingDisplay,
+          SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay),
+          displayName,
+          null
+      );
+      PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+          new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_DISPLAY_NAME
+          ), data));
+    });
+  }
+
+  public void setDisplayInTab(boolean displayInTab) {
+    this.displayInTab = displayInTab;
+    updatePlayerInfo();
+  }
+
+  public void setGameModeDisplay(GameMode gameModeDisplay) {
+    this.gameModeDisplay = gameModeDisplay;
+    updatePlayerInfo();
+  }
+
+  public void setPingDisplay(int pingDisplay) {
+    this.pingDisplay = pingDisplay;
+    updatePlayerInfo();
+  }
+
+  public void setDisplayName(Component displayName) {
+    this.displayName = displayName;
+    updatePlayerInfo();
   }
 
   @Override

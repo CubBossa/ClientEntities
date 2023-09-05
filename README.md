@@ -60,7 +60,7 @@ playerSpace.unregisterListener(listener);
 #### ClientEntities
 
 ````Java
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import org.bukkit.Location;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.util.Vector;
@@ -68,12 +68,12 @@ import org.bukkit.util.Vector;
 import java.util.UUID;
 
 class Fountain {
-  PlayerSpace playerSpace;
+  PlayerSpaceImpl playerSpace;
   Location location;
   Vector direction;
 
   public Fountain(UUID... players) {
-    playerSpace = PlayerSpace.create(players);
+    playerSpace = PlayerSpaceImpl.create(players);
   }
 
   void play() {
@@ -98,7 +98,7 @@ class Fountain {
 #### Spigot
 
 ````Java
-import de.cubbossa.cliententities.PlayerSpace;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;

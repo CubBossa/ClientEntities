@@ -2,7 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
@@ -25,7 +25,7 @@ public class ClientTextDisplay extends ClientDisplay {
   private boolean defaultBackground = false;
   private TextDisplay.TextAlignment alignment = TextDisplay.TextAlignment.CENTER;
 
-  public ClientTextDisplay(PlayerSpace playerSpace, int entityId) {
+  public ClientTextDisplay(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.TEXT_DISPLAY);
   }
 

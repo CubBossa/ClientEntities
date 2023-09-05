@@ -3,20 +3,16 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import lombok.Getter;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Getter
 public class ClientArmorStand extends ClientLivingEntity {
@@ -33,7 +29,7 @@ public class ClientArmorStand extends ClientLivingEntity {
   private EulerAngle rightLegPose = new EulerAngle(0, 0, 0);
   private EulerAngle leftLegPose = new EulerAngle(0, 0, 0);
 
-  public ClientArmorStand(PlayerSpace playerSpace, int entityId) {
+  public ClientArmorStand(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.ARMOR_STAND);
   }
 

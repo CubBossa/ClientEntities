@@ -4,11 +4,10 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import com.github.retrooper.packetevents.util.UUIDUtil;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.UntickedEntity;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
@@ -35,7 +34,7 @@ public class ClientEntity implements UntickedEntity {
   final int entityId;
   final UUID uniqueId;
   final EntityType type;
-  final PlayerSpace playerSpace;
+  final PlayerSpaceImpl playerSpace;
 
   boolean alive = true;
   Location previousLocation = null;
@@ -69,14 +68,27 @@ public class ClientEntity implements UntickedEntity {
   List<Byte> statusEffects = new LinkedList<>();
   List<Consumer<Player>> runnableEffects = new LinkedList<>();
 
-  public ClientEntity(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+  public ClientEntity(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     this.playerSpace = playerSpace;
     this.entityId = entityId;
-    this.uniqueId = UUID.randomUUID();
+    this.uniqueId = createId();
     this.type = entityType;
 
     // entity not yet spawned
     this.aliveChanged = true;
+  }
+
+  public UUID createId() {
+    return UUID.randomUUID();
+  }
+
+  void spawn(Player player) {
+    PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+        new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
+            new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
+            Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getX(), velocity.getY(), velocity.getZ()))
+        )
+    );
   }
 
   @Override
@@ -86,12 +98,7 @@ public class ClientEntity implements UntickedEntity {
 
       // Spawn entity
       if (aliveChanged && alive) {
-        api.getPlayerManager().sendPacket(player,
-            new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
-                new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
-                Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getX(), velocity.getY(), velocity.getZ()))
-            )
-        );
+        spawn(player);
         aliveChanged = false;
         locationChanged = false;
       }

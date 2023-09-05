@@ -19,9 +19,9 @@ import java.util.function.Consumer;
 public class ClientEntityListener extends PacketListenerAbstract {
 
   private final Executor executor;
-  private final PlayerSpace playerSpace;
+  private final PlayerSpaceImpl playerSpace;
 
-  public ClientEntityListener(Executor executor, PlayerSpace playerSpace) {
+  public ClientEntityListener(Executor executor, PlayerSpaceImpl playerSpace) {
     super(PacketListenerPriority.HIGH);
     this.executor = executor;
     this.playerSpace = playerSpace;

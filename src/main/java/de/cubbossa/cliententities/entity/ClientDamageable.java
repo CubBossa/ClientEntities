@@ -1,10 +1,8 @@
 package de.cubbossa.cliententities.entity;
 
-import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +14,7 @@ public class ClientDamageable extends ClientEntity {
   private double maxHealth;
   private double health;
 
-  public ClientDamageable(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+  public ClientDamageable(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 

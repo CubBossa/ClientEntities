@@ -2,7 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import org.bukkit.entity.EntityType;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public abstract class ClientAbstractVillager extends ClientAgeableMob {
 
     int headShakeTimer = 40;
 
-    public ClientAbstractVillager(PlayerSpace playerSpace, int entityId, EntityType entityType) {
+    public ClientAbstractVillager(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
         super(playerSpace, entityId, entityType);
     }
 

@@ -2,15 +2,13 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
-import de.cubbossa.cliententities.PlayerSpace;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -30,7 +28,7 @@ public class ClientFireWork extends ClientEntity {
   boolean shotAtAngle = false;
   boolean detonated = false;
 
-  public ClientFireWork(PlayerSpace playerSpace, int entityId) {
+  public ClientFireWork(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.FIREWORK);
   }
 
