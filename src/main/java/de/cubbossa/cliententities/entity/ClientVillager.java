@@ -4,74 +4,101 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.ServerSideMethodNotSupported;
+import de.cubbossa.cliententities.TrackedField;
 import lombok.Getter;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.EntityCategory;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Pose;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-@Getter
-public class ClientVillager extends ClientAbstractVillager {
+public class ClientVillager extends ClientAbstractVillager implements Villager {
 
-    Villager.Type villagerType = Villager.Type.PLAINS;
-    Villager.Profession profession = Villager.Profession.NONE;
-    int villagerLevel = 0;
+    TrackedField<Villager.Type> villagerType = new TrackedField<>(Villager.Type.PLAINS);
+    TrackedField<Villager.Profession> profession = new TrackedField<>(Villager.Profession.NONE);
+    TrackedField<Integer> villagerLevel = new TrackedField<>(0);
 
     public ClientVillager(PlayerSpaceImpl playerSpace, int entityId) {
         super(playerSpace, entityId, EntityType.VILLAGER);
     }
 
     @Override
-    public @NotNull EntityCategory getCategory() {
-        return EntityCategory.NONE;
-    }
-
-    @Override
     List<EntityData> metaData() {
         List<EntityData> data = super.metaData();
-        if (villagerLevel != 0 || villagerType != Villager.Type.PLAINS || profession != Villager.Profession.NONE) {
+        if (villagerLevel.hasChanged() || villagerType.hasChanged() || profession.hasChanged()) {
             data.add(new EntityData(18, EntityDataTypes.VILLAGER_DATA, new VillagerData(
-                    villagerType.ordinal(), profession.ordinal(), villagerLevel
+                    villagerType.getValue().ordinal(), profession.getValue().ordinal(), villagerLevel.getValue()
             )));
         }
         return data;
     }
 
+    @NotNull
+    @Override
+    public Profession getProfession() {
+        return profession.getValue();
+    }
+
     public void setProfession(@NotNull Villager.Profession profession) {
-        this.profession = setMeta(this.profession, profession);
+    setMeta(this.profession, profession);
+    }
+
+    @NotNull
+    @Override
+    public Type getVillagerType() {
+        return villagerType.getValue();
     }
 
     public void setVillagerType(@NotNull Villager.Type type) {
-        this.villagerType = setMeta(this.villagerType, type);
+    setMeta(this.villagerType, type);
+    }
+
+    @Override
+    public int getVillagerLevel() {
+        return villagerLevel.getValue();
     }
 
     public void setVillagerLevel(int i) {
-        this.villagerLevel = setMeta(this.villagerLevel, i);
+    setMeta(this.villagerLevel, i);
+    }
+
+    @Override
+    public int getVillagerExperience() {
+        throw new ServerSideMethodNotSupported();
+    }
+
+    @Override
+    public void setVillagerExperience(int i) {
+        throw new ServerSideMethodNotSupported();
     }
 
     public boolean sleep(@NotNull Location location) {
         teleport(location);
-        setPose(Pose.SLEEPING);
+        pose.setValue(Pose.SLEEPING);
         return true;
     }
 
     public void wakeup() {
-        setPose(Pose.STANDING);
+        pose.setValue(Pose.STANDING);
     }
 
     public void shakeHead() {
-        this.headShakeTimer = setMeta(this.headShakeTimer, 40);
+    setMeta(this.headShakeTimer, 40);
+    }
+
+    @Nullable
+    @Override
+    public ZombieVillager zombify() {
+        throw new ServerSideMethodNotSupported();
     }
 
     public void shakeHead(int ticks) {
-        this.headShakeTimer = setMeta(this.headShakeTimer, ticks);
+    setMeta(this.headShakeTimer, ticks);
     }
 
     public void happy() {

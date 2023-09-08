@@ -14,19 +14,20 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class ClientEntityEquipment implements EntityEquipment {
+public class TrackedEntityEquipment implements EntityEquipment {
 
   private final ClientLivingEntity holder;
   private final Map<EquipmentSlot, ItemStack> map = new HashMap<>();
+  boolean changed = false;
 
-  public ClientEntityEquipment(ClientLivingEntity holder) {
+  public TrackedEntityEquipment(ClientLivingEntity holder) {
     this.holder = holder;
   }
 
   @Override
   public void setItem(@NotNull EquipmentSlot slot, @Nullable ItemStack item) {
     map.put(slot, item);
-    holder.setEquipmentChanged(true);
+    changed = true;
   }
 
   @Override
@@ -164,7 +165,11 @@ public class ClientEntityEquipment implements EntityEquipment {
   @Override
   public void clear() {
     map.clear();
-    holder.setEquipmentChanged(true);
+    changed = true;
+  }
+
+  public boolean hasChanged() {
+    return changed;
   }
 
   @Override
@@ -172,9 +177,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setItemInHandDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -182,9 +187,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setItemInMainHandDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -192,9 +197,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setItemInOffHandDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -202,9 +207,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setHelmetDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -212,9 +217,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setChestplateDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -222,9 +227,9 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setLeggingsDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @Override
@@ -232,8 +237,8 @@ public class ClientEntityEquipment implements EntityEquipment {
     return 0;
   }
 
-  @Override
+  @Override  @Deprecated
   public void setBootsDropChance(float chance) {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 }

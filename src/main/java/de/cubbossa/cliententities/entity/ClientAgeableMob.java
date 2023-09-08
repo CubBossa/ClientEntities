@@ -3,13 +3,16 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.ServerSideMethodNotSupported;
+import de.cubbossa.cliententities.TrackedBoolField;
+import org.bukkit.entity.Ageable;
 import org.bukkit.entity.EntityType;
 
 import java.util.List;
 
-public abstract class ClientAgeableMob extends ClientMob {
+public abstract class ClientAgeableMob extends ClientMob implements Ageable {
 
-    private boolean baby = false;
+    TrackedBoolField baby = new TrackedBoolField(false);
 
     public ClientAgeableMob(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
         super(playerSpace, entityId, entityType);
@@ -18,21 +21,52 @@ public abstract class ClientAgeableMob extends ClientMob {
     @Override
     List<EntityData> metaData() {
         List<EntityData> data = super.metaData();
-        if (baby) {
-            data.add(new EntityData(16, EntityDataTypes.BOOLEAN, true));
+        if (baby.hasChanged()) {
+            data.add(new EntityData(16, EntityDataTypes.BOOLEAN, baby.getBooleanValue()));
+            baby.flushChanged();
         }
         return data;
     }
 
+    @Override
+    public int getAge() {
+        throw new ServerSideMethodNotSupported();
+    }
+
+    @Override
+    public void setAge(int i) {
+        throw new ServerSideMethodNotSupported();
+    }
+
+    @Override
+    public void setAgeLock(boolean b) {
+        throw new ServerSideMethodNotSupported();
+    }
+
+    @Override
+    public boolean getAgeLock() {
+        throw new ServerSideMethodNotSupported();
+    }
+
     public void setBaby() {
-        baby = setMeta(this.baby, true);
+    setMeta(this.baby, true);
     }
 
     public void setAdult() {
-        baby = setMeta(this.baby, false);
+    setMeta(this.baby, false);
     }
 
     public boolean isAdult() {
-        return !baby;
+        return !baby.getBooleanValue();
+    }
+
+    @Override
+    public boolean canBreed() {
+        throw new ServerSideMethodNotSupported();
+    }
+
+    @Override
+    public void setBreed(boolean b) {
+        throw new ServerSideMethodNotSupported();
     }
 }

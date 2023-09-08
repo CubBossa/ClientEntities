@@ -3,10 +3,11 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
-import de.cubbossa.cliententities.PlayerSpaceImpl;
-import lombok.Getter;
+import de.cubbossa.cliententities.*;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.jetbrains.annotations.NotNull;
@@ -14,20 +15,20 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-@Getter
-public class ClientArmorStand extends ClientLivingEntity {
+public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
 
-  private boolean small = false;
-  private boolean basePlate = true;
-  private boolean marker = false;
-  private boolean arms = false;
+  TrackedBoolField small = new TrackedBoolField();
+  TrackedBoolField basePlate = new TrackedBoolField(true);
+  TrackedBoolField marker = new TrackedBoolField();
+  TrackedBoolField arms = new TrackedBoolField();
+  TrackedMask armorStandMask = new TrackedMask(small, arms, basePlate, marker);
 
-  private EulerAngle headPose = new EulerAngle(0, 0, 0);
-  private EulerAngle bodyPose = new EulerAngle(0, 0, 0);
-  private EulerAngle rightArmPose = new EulerAngle(0, 0, 0);
-  private EulerAngle leftArmPose = new EulerAngle(0, 0, 0);
-  private EulerAngle rightLegPose = new EulerAngle(0, 0, 0);
-  private EulerAngle leftLegPose = new EulerAngle(0, 0, 0);
+  TrackedField<EulerAngle> headPose = new TrackedField<>(new EulerAngle(0, 0, 0));
+  TrackedField<EulerAngle> bodyPose = new TrackedField<>(new EulerAngle(0, 0, 0));
+  TrackedField<EulerAngle> rightArmPose = new TrackedField<>(new EulerAngle(-15, 0, 10));
+  TrackedField<EulerAngle> leftArmPose = new TrackedField<>(new EulerAngle(-10, 0, 10));
+  TrackedField<EulerAngle> rightLegPose = new TrackedField<>(new EulerAngle(1, 0, 1));
+  TrackedField<EulerAngle> leftLegPose = new TrackedField<>(new EulerAngle(-1, 0, -1));
 
   public ClientArmorStand(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.ARMOR_STAND);
@@ -79,95 +80,159 @@ public class ClientArmorStand extends ClientLivingEntity {
     return equipment.getHelmet();
   }
 
+  public boolean getArms() {
+    return arms.getBooleanValue();
+  }
+
   public void setHelmet(@Nullable ItemStack item) {
     equipment.setHelmet(item);
   }
 
+  public EulerAngle getBodyPose() {
+    return bodyPose.getValue();
+  }
+
   public void setBodyPose(@NotNull EulerAngle pose) {
-    this.bodyPose = setMeta(this.bodyPose, pose);
+    setMeta(this.bodyPose, pose);
+  }
+
+  @NotNull
+  @Override
+  public EulerAngle getLeftArmPose() {
+    return leftArmPose.getValue();
   }
 
   public void setLeftArmPose(@NotNull EulerAngle pose) {
-    this.leftArmPose = setMeta(this.leftArmPose, pose);
+    setMeta(this.leftArmPose, pose);
+  }
+
+  @NotNull
+  @Override
+  public EulerAngle getRightArmPose() {
+    return rightArmPose.getValue();
   }
 
   public void setRightArmPose(@NotNull EulerAngle pose) {
-    this.rightArmPose = setMeta(this.rightArmPose, pose);
+    setMeta(this.rightArmPose, pose);
+  }
+
+  @NotNull
+  @Override
+  public EulerAngle getLeftLegPose() {
+    return leftLegPose.getValue();
   }
 
   public void setLeftLegPose(@NotNull EulerAngle pose) {
-    this.leftLegPose = setMeta(this.leftLegPose, pose);
+    setMeta(this.leftLegPose, pose);
+  }
+
+  @NotNull
+  @Override
+  public EulerAngle getRightLegPose() {
+    return rightLegPose.getValue();
   }
 
   public void setRightLegPose(@NotNull EulerAngle pose) {
-    this.rightLegPose = setMeta(this.rightLegPose, pose);
+    setMeta(this.rightLegPose, pose);
+  }
+
+  public @NotNull EulerAngle getHeadPose() {
+    return headPose.getValue();
   }
 
   public void setHeadPose(@NotNull EulerAngle pose) {
-    this.headPose = setMeta(this.headPose, pose);
+    setMeta(this.headPose, pose);
   }
 
   public boolean hasArms() {
-    return arms;
+    return arms.getBooleanValue();
   }
 
   public void setArms(boolean arms) {
-    this.arms = setMeta(this.arms, arms);
+    setMeta(this.arms, arms);
+  }
+
+  @Override
+  public boolean isSmall() {
+    return small.getBooleanValue();
   }
 
   public void setSmall(boolean small) {
-    this.small = setMeta(this.small, small);
+    setMeta(this.small, small);
+  }
+
+  @Override
+  public boolean isMarker() {
+    return marker.getBooleanValue();
   }
 
   public void setMarker(boolean marker) {
-    this.marker = setMeta(this.marker, marker);
+    setMeta(this.marker, marker);
+  }
+
+  @Override
+  @Deprecated
+  public void addEquipmentLock(@NotNull EquipmentSlot equipmentSlot, @NotNull ArmorStand.LockType lockType) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void removeEquipmentLock(@NotNull EquipmentSlot equipmentSlot, @NotNull ArmorStand.LockType lockType) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasEquipmentLock(@NotNull EquipmentSlot equipmentSlot, @NotNull ArmorStand.LockType lockType) {
+    throw new ServerSideMethodNotSupported();
   }
 
   public boolean hasBasePlate() {
-    return basePlate;
+    return basePlate.getBooleanValue();
   }
 
   public void setBasePlate(boolean basePlate) {
-    this.basePlate = setMeta(this.basePlate, basePlate);
+    setMeta(this.basePlate, basePlate);
+  }
+
+  @Override
+  public boolean isVisible() {
+    return !invisible.getBooleanValue();
   }
 
   public void setVisible(boolean visible) {
-    this.visible = setMeta(this.visible, visible);
+    setMeta(this.invisible, !visible);
   }
 
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    byte mask = (byte)
-        ((isSmall() ? 0x01 : 0)
-            | (hasArms() ? 0x02 : 0)
-            | (!hasBasePlate() ? 0x04 : 0)
-            | (isMarker() ? 0x08 : 0));
-    if (mask != 0) {
-      data.add(new EntityData(15, EntityDataTypes.BYTE, mask));
+    if (armorStandMask.hasChanged()) {
+      data.add(new EntityData(15, EntityDataTypes.BYTE, armorStandMask.byteVal()));
     }
-    if (!headPose.equals(new EulerAngle(0, 0, 0))) {
+    if (headPose.hasChanged()) {
       data.add(new EntityData(16, EntityDataTypes.ROTATION,
-          new Vector3f((float) headPose.getX(), (float) headPose.getY(), (float) headPose.getZ())));
+          new Vector3f((float) headPose.getValue().getX(), (float) headPose.getValue().getY(), (float) headPose.getValue().getZ())));
     }
-    if (!bodyPose.equals(new EulerAngle(0, 0, 0))) {
+    if (bodyPose.hasChanged()) {
       data.add(new EntityData(17, EntityDataTypes.ROTATION,
-          new Vector3f((float) bodyPose.getX(), (float) bodyPose.getY(), (float) bodyPose.getZ())));
+          new Vector3f((float) bodyPose.getValue().getX(), (float) bodyPose.getValue().getY(), (float) bodyPose.getValue().getZ())));
     }
-    if (!leftArmPose.equals(new EulerAngle(-10, 0, 10))) {
+    if (leftArmPose.hasChanged()) {
       data.add(new EntityData(18, EntityDataTypes.ROTATION,
-          new Vector3f((float) leftArmPose.getX(), (float) leftArmPose.getY(), (float) leftArmPose.getZ())));
+          new Vector3f((float) leftArmPose.getValue().getX(), (float) leftArmPose.getValue().getY(), (float) leftArmPose.getValue().getZ())));
     }
-    if (!rightArmPose.equals(new EulerAngle(-15, 0, 10))) {
+    if (rightArmPose.hasChanged()) {
       data.add(new EntityData(19, EntityDataTypes.ROTATION,
-          new Vector3f((float) rightArmPose.getX(), (float) rightArmPose.getY(), (float) rightArmPose.getZ())));
+          new Vector3f((float) rightArmPose.getValue().getX(), (float) rightArmPose.getValue().getY(), (float) rightArmPose.getValue().getZ())));
     }
-    if (!leftLegPose.equals(new EulerAngle(-1, 0, -1))) {
+    if (leftLegPose.hasChanged()) {
       data.add(new EntityData(20, EntityDataTypes.ROTATION,
-          new Vector3f((float) leftLegPose.getX(), (float) leftLegPose.getY(), (float) leftLegPose.getZ())));
+          new Vector3f((float) leftLegPose.getValue().getX(), (float) leftLegPose.getValue().getY(), (float) leftLegPose.getValue().getZ())));
     }
-    if (!rightLegPose.equals(new EulerAngle(1, 0, 1))) {
+    if (rightLegPose.hasChanged()) {
       data.add(new EntityData(21, EntityDataTypes.ROTATION,
-          new Vector3f((float) rightLegPose.getX(), (float) rightLegPose.getY(), (float) rightLegPose.getZ())));
+          new Vector3f((float) rightLegPose.getValue().getX(), (float) rightLegPose.getValue().getY(), (float) rightLegPose.getValue().getZ())));
     }
     return data;
   }

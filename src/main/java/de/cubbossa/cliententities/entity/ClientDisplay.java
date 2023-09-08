@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.TrackedField;
 import lombok.Getter;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
@@ -18,120 +19,174 @@ import org.joml.Vector3f;
 
 import java.util.List;
 
-@Getter
-public class ClientDisplay extends ClientEntity {
+public class ClientDisplay extends ClientEntity implements Display {
 
-  int interpolationDelay = 0;
-  int interpolationDuration = 0;
-  Transformation transformation = new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(1, 1, 1), new AxisAngle4f());
-  Display.Billboard billboard = Display.Billboard.FIXED;
-  @Nullable Display.Brightness brightness = null;
-  float viewRange = 1;
-  float shadowRadius = 0;
-  float shadowStrength = 1;
-  float displayWidth = 0;
-  float displayHeight = 0;
-  @Nullable Color glowColorOverride = null;
+  TrackedField<Integer> interpolationDelay = new TrackedField<>(0);
+  TrackedField<Integer> interpolationDuration = new TrackedField<>(0);
+  TrackedField<Transformation> transformation = new TrackedField<>(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(1, 1, 1), new AxisAngle4f()));
+  TrackedField<Display.Billboard> billboard = new TrackedField<>(Display.Billboard.FIXED);
+  TrackedField<Display.@Nullable Brightness> brightness = new TrackedField<>();
+  TrackedField<Float> viewRange = new TrackedField<>(1f);
+  TrackedField<Float> shadowRadius = new TrackedField<>(0f);
+  TrackedField<Float> shadowStrength = new TrackedField<>(1f);
+  TrackedField<Float> displayWidth = new TrackedField<>(0f);
+  TrackedField<Float> displayHeight = new TrackedField<>(0f);
+  TrackedField<@Nullable Color> glowColorOverride = new TrackedField<>();
 
   public ClientDisplay(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     super(playerSpace, entityId, entityType);
   }
 
+  @NotNull
+  @Override
+  public Transformation getTransformation() {
+    return transformation.getValue();
+  }
+
   public void setTransformation(@NotNull Transformation transformation) {
-    if (this.transformation.equals(transformation)) {
-      return;
-    }
-    this.transformation = transformation;
-    metaChanged = true;
+    setMeta(this.transformation, transformation);
   }
 
   public void setTransformationMatrix(@NotNull Matrix4f transformationMatrix) {
-    transformationMatrix.getTranslation(this.transformation.getTranslation());
-    transformationMatrix.getScale(this.transformation.getScale());
-    transformationMatrix.getUnnormalizedRotation(this.transformation.getLeftRotation());
+    transformationMatrix.getTranslation(this.transformation.getValue().getTranslation());
+    transformationMatrix.getScale(this.transformation.getValue().getScale());
+    transformationMatrix.getUnnormalizedRotation(this.transformation.getValue().getLeftRotation());
     metaChanged = true;
   }
 
+  @Override
+  public int getInterpolationDuration() {
+    return interpolationDuration.getValue();
+  }
+
   public void setInterpolationDuration(int duration) {
-    this.interpolationDuration = setMeta(this.interpolationDuration, duration);
+    setMeta(this.interpolationDuration, duration);
+  }
+
+  @Override
+  public float getViewRange() {
+    return viewRange.getValue();
   }
 
   public void setViewRange(float range) {
-    this.viewRange = setMeta(this.viewRange, range);
+    setMeta(this.viewRange, range);
+  }
+
+  @Override
+  public float getShadowRadius() {
+    return shadowRadius.getValue();
   }
 
   public void setShadowRadius(float radius) {
-    this.shadowRadius = setMeta(this.shadowRadius, radius);
+    setMeta(this.shadowRadius, radius);
+  }
+
+  @Override
+  public float getShadowStrength() {
+    return shadowStrength.getValue();
   }
 
   public void setShadowStrength(float strength) {
-    this.shadowStrength = setMeta(this.shadowStrength, strength);
+    setMeta(this.shadowStrength, strength);
+  }
+
+  @Override
+  public float getDisplayWidth() {
+    return displayWidth.getValue();
   }
 
   public void setDisplayWidth(float width) {
-    this.displayWidth = setMeta(this.displayWidth, width);
+    setMeta(this.displayWidth, width);
+  }
+
+  @Override
+  public float getDisplayHeight() {
+    return displayHeight.getValue();
   }
 
   public void setDisplayHeight(float height) {
-    this.displayHeight = setMeta(this.displayHeight, height);
+    setMeta(this.displayHeight, height);
+  }
+
+  @Override
+  public int getInterpolationDelay() {
+    return interpolationDelay.getValue();
   }
 
   public void setInterpolationDelay(int ticks) {
-    this.interpolationDelay = setMeta(this.interpolationDelay, ticks);
+    setMeta(this.interpolationDelay, ticks);
+  }
+
+  @NotNull
+  @Override
+  public Billboard getBillboard() {
+    return billboard.getValue();
   }
 
   public void setBillboard(@NotNull Display.Billboard billboard) {
-    this.billboard = setMeta(this.billboard, billboard);
+    setMeta(this.billboard, billboard);
+  }
+
+  @Nullable
+  @Override
+  public Color getGlowColorOverride() {
+    return glowColorOverride.getValue();
   }
 
   public void setGlowColorOverride(@Nullable Color color) {
-    this.glowColorOverride = setMeta(this.glowColorOverride, color);
+    setMeta(this.glowColorOverride, color);
+  }
+
+  @Nullable
+  @Override
+  public Brightness getBrightness() {
+    return brightness.getValue();
   }
 
   public void setBrightness(@Nullable Display.Brightness brightness) {
-    this.brightness = setMeta(this.brightness, brightness);
+    setMeta(this.brightness, brightness);
   }
 
   @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    if (interpolationDelay != 0) {
-      data.add(new EntityData(8, EntityDataTypes.INT, interpolationDelay));
+    if (interpolationDelay.hasChanged()) {
+      data.add(new EntityData(8, EntityDataTypes.INT, interpolationDelay.getValue()));
     }
-    if (interpolationDuration != 0) {
-      data.add(new EntityData(9, EntityDataTypes.INT, interpolationDuration));
+    if (interpolationDuration.hasChanged()) {
+      data.add(new EntityData(9, EntityDataTypes.INT, interpolationDuration.getValue()));
     }
-    if (!transformation.getTranslation().equals(new Vector3f(0, 0, 0))) {
-      data.add(new EntityData(10, EntityDataTypes.VECTOR3F, convert(transformation.getTranslation())));
+    if (transformation.hasChanged()) {
+      data.add(new EntityData(10, EntityDataTypes.VECTOR3F, convert(transformation.getValue().getTranslation())));
+      data.add(new EntityData(11, EntityDataTypes.VECTOR3F, convert(transformation.getValue().getScale())));
+      data.add(new EntityData(12, EntityDataTypes.QUATERNION, convert(transformation.getValue().getLeftRotation())));
+      data.add(new EntityData(13, EntityDataTypes.QUATERNION, convert(transformation.getValue().getRightRotation())));
     }
-    if (!transformation.getScale().equals(new Vector3f(1, 1, 1))) {
-      data.add(new EntityData(11, EntityDataTypes.VECTOR3F, convert(transformation.getScale())));
+    if (billboard.hasChanged()) {
+      data.add(new EntityData(14, EntityDataTypes.BYTE, (byte) billboard.getValue().ordinal()));
     }
-    data.add(new EntityData(12, EntityDataTypes.QUATERNION, convert(transformation.getLeftRotation())));
-    data.add(new EntityData(13, EntityDataTypes.QUATERNION, convert(transformation.getRightRotation())));
-    if (billboard != Display.Billboard.FIXED) {
-      data.add(new EntityData(14, EntityDataTypes.BYTE, (byte) billboard.ordinal()));
+    if (brightness.hasChanged()) {
+      data.add(new EntityData(15, EntityDataTypes.INT, brightness.getValue() == null
+          ? -1 : brightness.getValue().getBlockLight() << 4 | brightness.getValue().getSkyLight() << 20));
     }
-    if (brightness != null) {
-      data.add(new EntityData(15, EntityDataTypes.INT, brightness.getBlockLight() << 4 | brightness.getSkyLight() << 20));
+    if (viewRange.hasChanged()) {
+      data.add(new EntityData(16, EntityDataTypes.FLOAT, viewRange.getValue()));
     }
-    if (viewRange != 1) {
-      data.add(new EntityData(16, EntityDataTypes.FLOAT, viewRange));
+    if (shadowRadius.hasChanged()) {
+      data.add(new EntityData(17, EntityDataTypes.FLOAT, shadowRadius.getValue()));
     }
-    if (shadowRadius != 0) {
-      data.add(new EntityData(17, EntityDataTypes.FLOAT, shadowRadius));
+    if (shadowStrength.hasChanged()) {
+      data.add(new EntityData(18, EntityDataTypes.FLOAT, shadowStrength.getValue()));
     }
-    if (shadowStrength != 1) {
-      data.add(new EntityData(18, EntityDataTypes.FLOAT, shadowStrength));
+    if (displayWidth.hasChanged()) {
+      data.add(new EntityData(19, EntityDataTypes.FLOAT, displayWidth.getValue()));
     }
-    if (displayWidth != 0) {
-      data.add(new EntityData(19, EntityDataTypes.FLOAT, displayWidth));
+    if (displayHeight.hasChanged()) {
+      data.add(new EntityData(20, EntityDataTypes.FLOAT, displayHeight.getValue()));
     }
-    if (displayHeight != 0) {
-      data.add(new EntityData(20, EntityDataTypes.FLOAT, displayHeight));
-    }
-    if (glowColorOverride != null) {
-      data.add(new EntityData(21, EntityDataTypes.INT, glowColorOverride.asRGB()));
+    if (glowColorOverride.hasChanged()) {
+      data.add(new EntityData(21, EntityDataTypes.INT, glowColorOverride.getValue() == null
+          ? -1 : glowColorOverride.getValue().asRGB()));
     }
     return data;
   }

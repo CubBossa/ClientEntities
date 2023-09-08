@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
+import de.cubbossa.cliententities.entity.ClientEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -33,7 +34,7 @@ public class ClientEntityListener extends PacketListenerAbstract {
     if (event.getPacketType() == PacketType.Play.Client.INTERACT_ENTITY) {
       callWithExecutor(event, e -> {
         WrapperPlayClientInteractEntity wrapper = new WrapperPlayClientInteractEntity(e);
-        Entity target = playerSpace.getEntity(wrapper.getEntityId());
+        ClientEntity target = playerSpace.getEntity(wrapper.getEntityId());
         if (target == null) {
           return;
         }

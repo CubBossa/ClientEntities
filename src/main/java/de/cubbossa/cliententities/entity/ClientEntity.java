@@ -1,33 +1,58 @@
 package de.cubbossa.cliententities.entity;
 
-import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.PacketEventsAPI;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Vector3d;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
-import de.cubbossa.cliententities.ClientEntityMethodNotSupportedException;
-import de.cubbossa.cliententities.PlayerSpaceImpl;
-import de.cubbossa.cliententities.UntickedEntity;
+import de.cubbossa.cliententities.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import lombok.Getter;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.*;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
-import org.bukkit.util.Consumer;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
-@Getter
-@Setter
+@NotThreadSafe
+public class ClientEntity implements ClientViewElement, Entity {
 
-public class ClientEntity implements UntickedEntity {
+  public static class DeletePacketInfo implements CombineInfo {
+
+    protected HashSet<Integer> ids = new HashSet<>();
+
+    @Override
+    public CombineInfo merge(CombineInfo other) {
+      if (!(other instanceof DeletePacketInfo)) {
+        throw new IllegalArgumentException("both combine infos must be of the same type");
+      }
+      DeletePacketInfo i = new DeletePacketInfo();
+      i.ids.addAll(this.ids);
+      return i;
+    }
+
+    @Override
+    public PacketWrapper<?> wrapper() {
+      return new WrapperPlayServerDestroyEntities(ids.stream().mapToInt(Integer::intValue).toArray());
+    }
+  }
 
   static final GsonComponentSerializer GSON = GsonComponentSerializer.gson();
 
@@ -36,37 +61,35 @@ public class ClientEntity implements UntickedEntity {
   final EntityType type;
   final PlayerSpaceImpl playerSpace;
 
-  boolean alive = true;
+  TrackedBoolField alive = new TrackedBoolField(false);
   Location previousLocation = null;
   Location location = new Location(null, 0, 0, 0);
-  Vector velocity = new Vector(0, 0, 0);
-  double height = 0;
-  double width = 0;
-  boolean onFire = false;
-  boolean crouching = false;
-  boolean sprinting = false;
-  boolean swimming = false;
-  boolean visible = true;
-  boolean glowing = false;
-  boolean elytraFlying = false;
-  int airTicks = 300;
-  boolean silent = true;
-  boolean gravity = true;
-  Pose pose = Pose.STANDING;
-  boolean frozen = false;
+  TrackedField<Vector> velocity = new TrackedField<>(new Vector(0, 0, 0));
+  TrackedField<Double> height = new TrackedField<>(0d);
+  TrackedField<Double> width = new TrackedField<>(0d);
+  TrackedBoolField onFire = new TrackedBoolField();
+  TrackedBoolField crouching = new TrackedBoolField();
+  TrackedBoolField sprinting = new TrackedBoolField();
+  TrackedBoolField swimming = new TrackedBoolField();
+  TrackedBoolField invisible = new TrackedBoolField();
+  TrackedBoolField glowing = new TrackedBoolField();
+  TrackedBoolField elytraFlying = new TrackedBoolField();
+  TrackedField<Integer> airTicks = new TrackedField<>(300);
+  TrackedBoolField silent = new TrackedBoolField(true);
+  TrackedBoolField gravity = new TrackedBoolField(true);
+  TrackedField<Pose> pose = new TrackedField<>(Pose.STANDING);
+  TrackedBoolField frozen = new TrackedBoolField();
 
-  boolean invulnerable = true;
+  TrackedBoolField customNameVisible = new TrackedBoolField();
+  TrackedField<Component> customName = new TrackedField<>();
 
-  boolean customNameVisible = false;
-  Component customName;
+  TrackedField<@Nullable Entity> vehicle = new TrackedField<>();
+  List<Integer> passengers = new ArrayList<>();
+  boolean passengersChanged = false;
 
-  // changed properties
-  boolean aliveChanged = false;
-  boolean locationChanged = false;
-  boolean velocityChanged = false;
+  List<Supplier<PacketInfo>> statelessEffect = new LinkedList<>();
+
   boolean metaChanged = false;
-  List<Byte> statusEffects = new LinkedList<>();
-  List<Consumer<Player>> runnableEffects = new LinkedList<>();
 
   public ClientEntity(PlayerSpaceImpl playerSpace, int entityId, EntityType entityType) {
     this.playerSpace = playerSpace;
@@ -75,166 +98,162 @@ public class ClientEntity implements UntickedEntity {
     this.type = entityType;
 
     // entity not yet spawned
-    this.aliveChanged = true;
+    alive.setValue(true);
   }
 
   public UUID createId() {
     return UUID.randomUUID();
   }
 
-  void spawn(Player player) {
-    PacketEvents.getAPI().getPlayerManager().sendPacket(player,
-        new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
-            new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
-            Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getX(), velocity.getY(), velocity.getZ()))
-        )
-    );
+  @Override
+  public List<UpdateInfo> spawn(boolean onlyIfChanged) {
+    if (!onlyIfChanged || alive.hasChanged() && alive.getBooleanValue()) {
+      alive.flushChanged();
+      return Collections.singletonList(PacketInfo.packet(spawnPacket()));
+    }
+    return Collections.emptyList();
+  }
+
+  PacketWrapper<?> spawnPacket() {
+    return new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
+        new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
+        Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getValue().getX(), velocity.getValue().getY(), velocity.getValue().getZ())));
   }
 
   @Override
-  public void announce(Collection<Player> viewers) {
-    for (Player player : viewers) {
-      PacketEventsAPI<?> api = PacketEvents.getAPI();
-
-      // Spawn entity
-      if (aliveChanged && alive) {
-        spawn(player);
-        aliveChanged = false;
-        locationChanged = false;
-      }
-      // Play Status Effects on Entity - before delete, for example rocket detonation.
-      if (!statusEffects.isEmpty()) {
-        statusEffects.forEach(id -> api.getPlayerManager().sendPacket(player, new WrapperPlayServerEntityStatus(entityId, id)));
-        statusEffects.clear();
-      }
-      // Play Sound Effects on Entity before it removal
-      if (!runnableEffects.isEmpty()) {
-        runnableEffects.forEach(c -> c.accept(player));
-        runnableEffects.clear();
-      }
-      // Delete Entity
-      if (aliveChanged && !alive) {
-        api.getPlayerManager().sendPacket(player,
-            new WrapperPlayServerDestroyEntities(entityId)
-        );
-        aliveChanged = false;
-        playerSpace.releaseEntity(this);
-      }
-      // Change location
-      if (locationChanged && location != null && !location.equals(previousLocation)) {
-        if (location.toVector().equals(previousLocation.toVector())) {
-          api.getPlayerManager().sendPacket(player,
-              new WrapperPlayServerEntityRotation(entityId, location.getYaw(), location.getPitch(), true)
-          );
-        } else if (location.distanceSquared(previousLocation) < 64) {
-          if (location.getDirection().equals(previousLocation.getDirection())) {
-            api.getPlayerManager().sendPacket(player,
-                new WrapperPlayServerEntityRelativeMove(entityId,
-                    location.getX() - previousLocation.getX(),
-                    location.getY() - previousLocation.getY(),
-                    location.getZ() - previousLocation.getZ(),
-                    true
-                )
-            );
-          } else {
-            api.getPlayerManager().sendPacket(player,
-                new WrapperPlayServerEntityRelativeMoveAndRotation(entityId,
-                    location.getX() - previousLocation.getX(),
-                    location.getY() - previousLocation.getY(),
-                    location.getZ() - previousLocation.getZ(),
-                    location.getYaw(),
-                    location.getPitch(),
-                    true
-                )
-            );
-          }
-        } else {
-          api.getPlayerManager().sendPacket(player,
-              new WrapperPlayServerEntityTeleport(entityId, SpigotConversionUtil.fromBukkitLocation(location), true)
-          );
-        }
-
-        previousLocation = location;
-        locationChanged = false;
-      }
-      // change velocity
-      if (velocityChanged && velocity != null) {
-        api.getPlayerManager().sendPacket(player,
-            new WrapperPlayServerEntityVelocity(entityId, new Vector3d(velocity.getX(), velocity.getY(), velocity.getZ())));
-        velocityChanged = false;
-      }
-      // Change Meta Data
-      if (metaChanged) {
-        try {
-          List<EntityData> data = metaData();
-          api.getPlayerManager().sendPacket(player, new WrapperPlayServerEntityMetadata(entityId, data));
-        } catch (Throwable t) {
-          t.printStackTrace();
-        }
-        metaChanged = false;
-      }
+  public List<UpdateInfo> delete(boolean onlyIfChanged) {
+    if (!onlyIfChanged || alive.hasChanged() && !alive.getBooleanValue()) {
+      DeletePacketInfo info = new DeletePacketInfo();
+      info.ids.add(this.entityId);
+      alive.flushChanged();
+      playerSpace.releaseEntity(this);
+      return Collections.singletonList(info);
     }
+    return Collections.emptyList();
+  }
+
+  @Override
+  public List<UpdateInfo> state(boolean onlyIfChanged) {
+    List<UpdateInfo> result = new ArrayList<>();
+
+    if (!statelessEffect.isEmpty()) {
+      statelessEffect.forEach(c -> result.add(c.get()));
+      statelessEffect.clear();
+    }
+
+    // Change location
+    if (location != null && !location.equals(previousLocation)) {
+      if (location.toVector().equals(previousLocation.toVector())) {
+        result.add(PacketInfo.packet(new WrapperPlayServerEntityRotation(entityId, location.getYaw(), location.getPitch(), true)));
+      } else if (location.distanceSquared(previousLocation) < 64) {
+        if (location.getDirection().equals(previousLocation.getDirection())) {
+          result.add(PacketInfo.packet(new WrapperPlayServerEntityRelativeMove(entityId,
+              location.getX() - previousLocation.getX(),
+              location.getY() - previousLocation.getY(),
+              location.getZ() - previousLocation.getZ(),
+              true
+          )));
+        } else {
+          result.add(PacketInfo.packet(new WrapperPlayServerEntityRelativeMoveAndRotation(entityId,
+              location.getX() - previousLocation.getX(),
+              location.getY() - previousLocation.getY(),
+              location.getZ() - previousLocation.getZ(),
+              location.getYaw(),
+              location.getPitch(),
+              true
+          )));
+        }
+      } else {
+        result.add(PacketInfo.packet(
+            new WrapperPlayServerEntityTeleport(entityId, SpigotConversionUtil.fromBukkitLocation(location), true)
+        ));
+      }
+
+      previousLocation = location;
+    }
+
+    // change velocity
+    if (velocity.hasChanged() && velocity.getValue() != null) {
+      result.add(PacketInfo.packet(
+          new WrapperPlayServerEntityVelocity(entityId, new Vector3d(velocity.getValue().getX(), velocity.getValue().getY(), velocity.getValue().getZ()))
+      ));
+      velocity.flushChanged();
+    }
+
+    // Change Meta Data
+    if (metaChanged) {
+      try {
+        List<EntityData> data = metaData();
+        result.add(PacketInfo.packet(new WrapperPlayServerEntityMetadata(entityId, data)));
+      } catch (Throwable t) {
+        t.printStackTrace();
+      }
+      metaChanged = false;
+    }
+
+    // Update Passengers
+    if (passengersChanged) {
+      result.add(PacketInfo.packet(
+          new WrapperPlayServerSetPassengers(entityId, passengers.stream().mapToInt(Integer::intValue).toArray())
+      ));
+      passengersChanged = false;
+    }
+    return result;
   }
 
   int data() {
     return 0;
   }
 
+  TrackedMask metaMask = new TrackedMask(
+      onFire, crouching, null, sprinting, swimming, invisible, glowing, elytraFlying
+  );
+
   List<EntityData> metaData() {
     List<EntityData> data = new ArrayList<>();
-    // flags
-    byte mask = (byte) (
-        (onFire ? 0x01 : 0)
-            | (crouching ? 0x02 : 0)
-            | (sprinting ? 0x08 : 0)
-            | (swimming ? 0x10 : 0)
-            | (!visible ? 0x20 : 0)
-            | (glowing ? 0x40 : 0)
-            | (elytraFlying ? 0x80 : 0)
-    );
-    if (mask != 0) {
-      data.add(new EntityData(0, EntityDataTypes.BYTE, mask));
+
+    if (metaMask.hasChanged()) {
+      data.add(new EntityData(0, EntityDataTypes.BYTE, metaMask.byteVal()));
     }
-    if (airTicks != 300) {
+    if (airTicks.hasChanged()) {
       data.add(new EntityData(1, EntityDataTypes.INT, airTicks));
     }
     // data.add(new EntityData(2, EntityDataTypes.OPTIONAL_COMPONENT, Optional.ofNullable(getCustomName())));
-    if (customNameVisible) {
+    if (customNameVisible.hasChanged()) {
       data.add(new EntityData(3, EntityDataTypes.BOOLEAN, true));
     }
-    if (silent) {
-      data.add(new EntityData(4, EntityDataTypes.BOOLEAN, true));
+    if (silent.hasChanged()) {
+      data.add(new EntityData(4, EntityDataTypes.BOOLEAN, silent.getBooleanValue()));
     }
-    if (!gravity) {
-      data.add(new EntityData(5, EntityDataTypes.BOOLEAN, false));
+    if (gravity.hasChanged()) {
+      data.add(new EntityData(5, EntityDataTypes.BOOLEAN, !gravity.getBooleanValue()));
     }
-    if (pose != Pose.STANDING) {
-      data.add(new EntityData(6, EntityDataTypes.ENTITY_POSE, pose));
+    if (pose.hasChanged()) {
+      data.add(new EntityData(6, EntityDataTypes.ENTITY_POSE, pose.getValue()));
     }
-    if (frozen) {
-      data.add(new EntityData(7, EntityDataTypes.INT, 1));
+    if (frozen.hasChanged()) {
+      data.add(new EntityData(7, EntityDataTypes.INT, frozen.getBooleanValue() ? 1 : 0));
     }
     return data;
   }
 
-  protected <T> T setMeta(T old, T val) {
-    if (Objects.equals(old, val)) {
-      return val;
+  protected <T> void setMeta(TrackedField<T> field, T val) {
+    field.setValue(val);
+    if (field.hasChanged()) {
+      metaChanged = true;
     }
-    metaChanged = true;
-    return val;
   }
 
   public void setCustomName(Component customName) {
-    this.customName = customName;
+    setMeta(this.customName, customName);
   }
 
   public void setCustomName(String customName) {
-    this.customName = Component.text(customName);
+    setCustomName(Component.text(customName));
   }
 
   public String getCustomName() {
-    return GSON.serialize(customName);
+    return GSON.serialize(customName.getValue());
   }
 
   @NotNull
@@ -261,47 +280,225 @@ public class ClientEntity implements UntickedEntity {
   public void setRotation(float yaw, float pitch) {
     this.location.setYaw(yaw);
     this.location.setPitch(pitch);
-    this.locationChanged = true;
   }
 
   public boolean teleport(@NotNull Location location) {
     this.location = location.clone();
-    this.locationChanged = true;
     return true;
   }
 
   public boolean teleport(@NotNull Location location, @NotNull PlayerTeleportEvent.TeleportCause cause) {
     this.location = location.clone();
-    this.locationChanged = true;
     return true;
   }
 
   public boolean teleport(@NotNull Entity destination) {
     this.location = destination.getLocation().clone();
-    this.locationChanged = true;
     return true;
   }
 
   public boolean teleport(@NotNull Entity destination, @NotNull PlayerTeleportEvent.TeleportCause cause) {
     this.location = destination.getLocation().clone();
-    this.locationChanged = true;
     return true;
   }
 
-  public void setVelocity(Vector velocity) {
-    this.velocity = velocity;
-    velocityChanged = true;
+  @NotNull
+  @Override
+  @Deprecated
+  public List<Entity> getNearbyEntities(double v, double v1, double v2) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public int getEntityId() {
+    return entityId;
+  }
+
+  @Override
+  @Deprecated
+  public int getFireTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getMaxFireTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setFireTicks(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  public void setVelocity(@NotNull Vector velocity) {
+    this.velocity.setValue(velocity);
+  }
+
+  @NotNull
+  @Override
+  public Vector getVelocity() {
+    return velocity.getValue();
+  }
+
+  @Override
+  public double getHeight() {
+    return height.getValue();
+  }
+
+  @Override
+  public double getWidth() {
+    return width.getValue();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public BoundingBox getBoundingBox() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isOnGround() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isInWater() {
+    throw new ServerSideMethodNotSupported();
   }
 
   public void playSound(Sound sound, SoundCategory category, float volume, float pitch) {
-    runnableEffects.add(player -> {
-      try {
-        com.github.retrooper.packetevents.protocol.sound.SoundCategory cat = com.github.retrooper.packetevents.protocol.sound.SoundCategory.valueOf(category.toString());
-        PacketEvents.getAPI().getPlayerManager().sendPacket(player, new WrapperPlayServerEntitySoundEffect(sound.ordinal(), cat, entityId, volume, pitch));
-      } catch (Throwable t) {
-        t.printStackTrace();
-      }
+    statelessEffect.add(() -> {
+      com.github.retrooper.packetevents.protocol.sound.SoundCategory cat = com.github.retrooper.packetevents.protocol.sound.SoundCategory.valueOf(category.toString());
+      return PacketInfo.packet(new WrapperPlayServerEntitySoundEffect(sound.ordinal(), cat, entityId, volume, pitch));
     });
+  }
+
+  @Override
+  @Deprecated
+  public void setMetadata(@NotNull String s, @NotNull MetadataValue metadataValue) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public List<MetadataValue> getMetadata(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasMetadata(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void removeMetadata(@NotNull String s, @NotNull Plugin plugin) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isPermissionSet(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isPermissionSet(@NotNull Permission permission) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasPermission(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasPermission(@NotNull Permission permission) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String s, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public PermissionAttachment addAttachment(@NotNull Plugin plugin) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String s, boolean b, int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public PermissionAttachment addAttachment(@NotNull Plugin plugin, int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void removeAttachment(@NotNull PermissionAttachment permissionAttachment) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void recalculatePermissions() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isOp() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setOp(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public PersistentDataContainer getPersistentDataContainer() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  public boolean isAliveChanged() {
+    return this.alive.getValue();
+  }
+
+  public void setAliveChanged(boolean changed) {
+    this.alive.overrideChanged(changed);
   }
 
   enum Animation {
@@ -323,97 +520,246 @@ public class ClientEntity implements UntickedEntity {
   }
 
   void playAnimation(Animation animation) {
-    runnableEffects.add(player -> {
-      PacketEvents.getAPI().getPlayerManager().sendPacket(player,
-          new WrapperPlayServerEntityAnimation(entityId, WrapperPlayServerEntityAnimation.EntityAnimationType.getById(animation.id)));
-    });
+    statelessEffect.add(() -> PacketInfo.packet(
+        new WrapperPlayServerEntityAnimation(entityId, WrapperPlayServerEntityAnimation.EntityAnimationType.getById(animation.id))
+    ));
   }
 
   public void setVisualFire(boolean fire) {
-    this.onFire = setMeta(this.onFire, fire);
+    setMeta(this.onFire, fire);
   }
 
   public boolean isVisualFire() {
-    return onFire;
+    return onFire.getBooleanValue();
+  }
+
+  @Override
+  @Deprecated
+  public int getFreezeTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getMaxFreezeTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setFreezeTicks(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public boolean isFrozen() {
+    return false;
   }
 
   public boolean isVisualFreeze() {
-    return frozen;
+    return frozen.getBooleanValue();
   }
 
   public void setVisualFreeze(boolean frozen) {
-    this.frozen = setMeta(this.frozen, frozen);
+    setMeta(this.frozen, frozen);
   }
 
   public void remove() {
-    alive = false;
-    aliveChanged = true;
+    alive.setValue(false);
   }
 
   public boolean isDead() {
-    return !alive;
+    return !alive.getBooleanValue();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isValid() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void sendMessage(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void sendMessage(@NotNull String... strings) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void sendMessage(@Nullable UUID uuid, @NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void sendMessage(@Nullable UUID uuid, @NotNull String... strings) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public Server getServer() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  public String getName() {
+    return null;
+  }
+
+  @Override
+  public boolean isPersistent() {
+    return false;
+  }
+
+  @Override
+  @Deprecated
+  public void setPersistent(boolean b) {
+    throw new ServerSideMethodNotSupported();
   }
 
   @Nullable
   public Entity getPassenger() {
-    throw new ClientEntityMethodNotSupportedException();
+    if (passengers.isEmpty()) {
+      return null;
+    }
+    return playerSpace.getEntity(passengers.get(0));
   }
 
   public boolean setPassenger(@NotNull Entity passenger) {
-    throw new ClientEntityMethodNotSupportedException();
+    passengers.clear();
+    passengers.add(passenger.getEntityId());
+    passengersChanged = true;
+    return true;
   }
 
   @NotNull
   public List<Entity> getPassengers() {
-    throw new ClientEntityMethodNotSupportedException();
+    return passengers.stream()
+        .map(playerSpace::getEntity)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
   }
 
   public boolean addPassenger(@NotNull Entity passenger) {
-    throw new ClientEntityMethodNotSupportedException();
+    passengersChanged = true;
+    return passengers.add(passenger.getEntityId());
   }
 
+  @Deprecated
   public boolean removePassenger(@NotNull Entity passenger) {
-    throw new ClientEntityMethodNotSupportedException();
+    passengersChanged = true;
+    return passengers.remove(passenger.getEntityId()) != null;
   }
 
   public boolean isEmpty() {
+    return passengers.isEmpty();
+  }
+
+  @Deprecated
+  public boolean eject() {
+    passengers.clear();
+    passengersChanged = true;
     return true;
   }
 
-  public boolean eject() {
-    throw new ClientEntityMethodNotSupportedException();
+  @Override
+  @Deprecated
+  public float getFallDistance() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setFallDistance(float v) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setLastDamageCause(@Nullable EntityDamageEvent entityDamageEvent) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public EntityDamageEvent getLastDamageCause() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  public UUID getUniqueId() {
+    return uniqueId;
+  }
+
+  @Override
+  @Deprecated
+  public int getTicksLived() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setTicksLived(int i) {
+    throw new ServerSideMethodNotSupported();
   }
 
   public void playEffect(@NotNull EntityEffect type) {
-    statusEffects.add(type.getData());
+    statelessEffect.add(() -> PacketInfo.packet(
+        new WrapperPlayServerEntityStatus(entityId, type.getData()))
+    );
   }
 
   @NotNull
+  @Override
+  public EntityType getType() {
+    return type;
+  }
+
+  @NotNull
+  @Deprecated
   public Sound getSwimSound() {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
+  @Deprecated
   public Sound getSwimSplashSound() {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
+  @Deprecated
   public Sound getSwimHighSpeedSplashSound() {
-    throw new ClientEntityMethodNotSupportedException();
+    throw new ServerSideMethodNotSupported();
   }
 
   public boolean isInsideVehicle() {
-    return false;
+    return vehicle.getValue() != null;
   }
 
+  @Deprecated
   public boolean leaveVehicle() {
-    throw new ClientEntityMethodNotSupportedException();
+    boolean inside = isInsideVehicle();
+    if (inside) {
+      vehicle.getValue().removePassenger(this);
+    }
+    return inside;
   }
 
   @Nullable
   public Entity getVehicle() {
-    return null;
+    return vehicle.getValue();
   }
 
   public void setCustomNameVisible(boolean flag) {
@@ -421,12 +767,54 @@ public class ClientEntity implements UntickedEntity {
   }
 
   public boolean isCustomNameVisible() {
-    return customNameVisible;
+    return customNameVisible.getBooleanValue();
+  }
+
+  @Override
+  @Deprecated
+  public void setVisibleByDefault(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean isVisibleByDefault() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public void setGlowing(boolean b) {
+    setMeta(glowing, b);
+  }
+
+  @Override
+  public boolean isGlowing() {
+    return glowing.getBooleanValue();
+  }
+
+  @Override
+  public void setInvulnerable(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public boolean isInvulnerable() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public boolean isSilent() {
+    return silent.getBooleanValue();
+  }
+
+  @Override
+  public void setSilent(boolean b) {
+    setMeta(silent, b);
   }
 
   @NotNull
   public Pose getPose() {
-    return pose;
+    return pose.getValue();
   }
 
   @NotNull
@@ -434,8 +822,65 @@ public class ClientEntity implements UntickedEntity {
     return SpawnCategory.MISC;
   }
 
+  @NotNull
+  @Override
+  @Deprecated
+  public Spigot spigot() {
+    throw new ServerSideMethodNotSupported();
+  }
+
   public boolean hasGravity() {
-    return gravity;
+    return gravity.getBooleanValue();
+  }
+
+  @Override
+  public void setGravity(boolean b) {
+    setMeta(gravity, b);
+  }
+
+  @Override
+  @Deprecated
+  public int getPortalCooldown() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setPortalCooldown(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public Set<String> getScoreboardTags() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean addScoreboardTag(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean removeScoreboardTag(@NotNull String s) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public PistonMoveReaction getPistonMoveReaction() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public BlockFace getFacing() {
+    throw new ServerSideMethodNotSupported();
   }
 
   void lookAt(Location location) {

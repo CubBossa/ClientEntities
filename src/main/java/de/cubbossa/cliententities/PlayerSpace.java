@@ -57,13 +57,21 @@ public interface PlayerSpace extends Closeable {
   <EventT extends Event> void callEvent(EventT event);
 
 
-  // Ticks
-
-  void announceEntityRemovals();
-
+  /**
+   * An order of packet processing is required to maintain valid states.
+   * Imagine following events:
+   * - Spawn A
+   * - Spawn B
+   * - Set B as passenger of A
+   * - announce();
+   * If simply announcing all entities in order, A would first be spawned, then its meta would be updated.
+   * Only after that, B would be spawned, even though it was already used in the update call of A.
+   * <br>
+   * To deal with this order, we simply spawn all entities at the start of one tick, update all entities after that
+   * and in the last step delete all entities that are supposed to be deleted.
+   * If certain more updates are needed, more PlayerSpaces or more announce() calls are necessary.
+   */
   void announce();
-
-  void announce(Entity e);
 
 
 
@@ -121,7 +129,6 @@ public interface PlayerSpace extends Closeable {
       timer.scheduleAtFixedRate(new TimerTask() {
         @Override
         public void run() {
-          playerSpace.announceEntityRemovals();
           playerSpace.announce();
         }
       }, period, period);

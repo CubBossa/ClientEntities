@@ -1,58 +1,73 @@
 package de.cubbossa.cliententities.entity;
 
-import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.UserProfile;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
-import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.*;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.*;
 import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
-@Getter
-public class ClientPlayer extends ClientLivingEntity {
+public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
 
-  boolean sneaking = false;
-  int pingDisplay = 0;
-  boolean displayInTab = false;
-  GameMode gameModeDisplay = GameMode.CREATIVE;
-  String name;
-  Component displayName;
-  Component tabName = Component.empty();
+  TrackedField<Integer> pingDisplay = new TrackedField<>(0);
+  TrackedBoolField displayInTab = new TrackedBoolField();
+  TrackedField<GameMode> gameModeDisplay = new TrackedField<>(GameMode.CREATIVE);
+  TrackedField<String> name = new TrackedField<>("");
+  TrackedField<Component> displayName = new TrackedField<>(Component.empty());
+  TrackedField<Component> tabName = new TrackedField<>(Component.empty());
 
-  MainHand mainHand = MainHand.RIGHT;
-  boolean capeEnabled = true;
-  boolean jacketEnabled = true;
-  boolean rightSleeveEnabled = true;
-  boolean leftSleeveEnabled = true;
-  boolean leftPantsEnabled = true;
-  boolean rightPantsEnabled = true;
-  boolean hatEnabled = true;
+  TrackedField<MainHand> mainHand = new TrackedField<>(MainHand.RIGHT);
+  TrackedBoolField capeEnabled = new TrackedBoolField(true);
+  TrackedBoolField jacketEnabled = new TrackedBoolField(true);
+  TrackedBoolField rightSleeveEnabled = new TrackedBoolField(true);
+  TrackedBoolField leftSleeveEnabled = new TrackedBoolField(true);
+  TrackedBoolField leftPantsEnabled = new TrackedBoolField(true);
+  TrackedBoolField rightPantsEnabled = new TrackedBoolField(true);
+  TrackedBoolField hatEnabled = new TrackedBoolField(true);
+  TrackedMask skinMask = new TrackedMask(
+      capeEnabled, jacketEnabled, rightSleeveEnabled, leftSleeveEnabled, rightPantsEnabled, leftPantsEnabled, hatEnabled
+  );
 
-  @Nullable Entity leftShoulderEntity = null;
-  @Nullable Entity rightShoulderEntity = null;
+  TrackedField<@Nullable Entity> leftShoulderEntity = new TrackedField<>();
+  TrackedField<@Nullable Entity> rightShoulderEntity = new TrackedField<>();
 
   public ClientPlayer(PlayerSpaceImpl playerSpace, String name) {
     super(playerSpace, -1, EntityType.PLAYER);
-    this.name = name;
-    this.displayName = Component.text(name);
+    this.name.setValue(name);
+    this.displayName.setValue(Component.text(name));
   }
 
   @Override
-  void spawn(Player player) {
-    super.spawn(player);
+  PacketWrapper<?> spawnPacket() {
+    WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+        new UserProfile(uniqueId, name.getValue()),
+        displayInTab.getBooleanValue(),
+        pingDisplay.getValue(),
+        SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay.getValue()),
+        tabName.getValue(),
+        null
+    );
+    return new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
+        WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER
+    ), data);
+  }
+
+  @Override
+  public List<UpdateInfo> state(boolean onlyIfChanged) {
+    List<UpdateInfo> info = super.state(onlyIfChanged);
 
     WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
         new UserProfile(uniqueId, name),
@@ -62,81 +77,140 @@ public class ClientPlayer extends ClientLivingEntity {
         displayName,
         null
     );
-    PacketEvents.getAPI().getPlayerManager().sendPacket(player,
+    info.add(PacketInfo.packet(
         new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
-            WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER
-        ), data));
-  }
+            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY,
+            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
+            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
+            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_DISPLAY_NAME
+        ), data)
+    ));
 
-  private void updatePlayerInfo() {
-    // TODO performance friendly way
-    runnableEffects.add(player -> {
-      WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
-          new UserProfile(uniqueId, name),
-          displayInTab,
-          pingDisplay,
-          SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay),
-          displayName,
-          null
-      );
-      PacketEvents.getAPI().getPlayerManager().sendPacket(player,
-          new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
-              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY,
-              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
-              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
-              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_DISPLAY_NAME
-          ), data));
-    });
+    return info;
   }
 
   public void setDisplayInTab(boolean displayInTab) {
     this.displayInTab = displayInTab;
-    updatePlayerInfo();
   }
 
   public void setGameModeDisplay(GameMode gameModeDisplay) {
     this.gameModeDisplay = gameModeDisplay;
-    updatePlayerInfo();
   }
 
   public void setPingDisplay(int pingDisplay) {
     this.pingDisplay = pingDisplay;
-    updatePlayerInfo();
   }
 
   public void setDisplayName(Component displayName) {
     this.displayName = displayName;
-    updatePlayerInfo();
   }
 
   @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    byte skinMask = (byte) (
-        (capeEnabled ? 0x1 : 0)
-            | (jacketEnabled ? 0x2 : 0)
-            | (leftSleeveEnabled ? 0x4 : 0)
-            | (rightSleeveEnabled ? 0x8 : 0)
-            | (leftPantsEnabled ? 0x10 : 0)
-            | (rightPantsEnabled ? 0x20 : 0)
-            | (hatEnabled ? 0x40 : 0)
-    );
-    if (skinMask > 0) {
-      data.add(new EntityData(17, EntityDataTypes.BYTE, skinMask));
+    if (skinMask.hasChanged()) {
+      data.add(new EntityData(17, EntityDataTypes.BYTE, skinMask.byteVal()));
     }
-    if (mainHand == MainHand.LEFT) {
-      data.add(new EntityData(18, EntityDataTypes.BYTE, 1));
+    if (mainHand.hasChanged()) {
+      data.add(new EntityData(18, EntityDataTypes.BYTE, mainHand.getValue() == MainHand.LEFT
+          ? 1 : 0));
     }
     return data;
   }
 
   public void setMainHand(MainHand mainHand) {
-    this.mainHand = setMeta(this.mainHand, mainHand);
+    setMeta(this.mainHand, mainHand);
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public PlayerInventory getInventory() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public Inventory getEnderChest() {
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
   public MainHand getMainHand() {
-    return MainHand.RIGHT;
+    return mainHand.getValue();
+  }
+
+  @Override
+  @Deprecated
+  public boolean setWindowProperty(@NotNull InventoryView.Property property, int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getEnchantmentSeed() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setEnchantmentSeed(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public InventoryView getOpenInventory() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public InventoryView openInventory(@NotNull Inventory inventory) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public InventoryView openWorkbench(@Nullable Location location, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public InventoryView openEnchanting(@Nullable Location location, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void openInventory(@NotNull InventoryView inventoryView) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public InventoryView openMerchant(@NotNull Villager villager, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  @Deprecated
+  public InventoryView openMerchant(@NotNull Merchant merchant, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void closeInventory() {
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
@@ -148,71 +222,276 @@ public class ClientPlayer extends ClientLivingEntity {
     equipment.setItemInHand(itemStack);
   }
 
+  @NotNull
+  @Override
+  @Deprecated
+  public ItemStack getItemOnCursor() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setItemOnCursor(@Nullable ItemStack itemStack) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasCooldown(@NotNull Material material) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getCooldown(@NotNull Material material) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setCooldown(@NotNull Material material, int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getSleepTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean sleep(@NotNull Location location, boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  public void wakeup(boolean b) {
+
+  }
+
+  @NotNull
+  @Override
+  public GameMode getGameMode() {
+    return gameModeDisplay;
+  }
+
+  @Override
+  public void setGameMode(@NotNull GameMode gameMode) {
+    this.gameModeDisplay = gameMode;
+  }
+
 
   public boolean isBlocking() {
-    return isHandActive && !activeHandMainHand;
+    return isHandActive.getBooleanValue() && !activeHandMainHand.getBooleanValue();
   }
 
   public boolean isHandRaised() {
-    return isHandActive;
+    return isHandActive.getBooleanValue();
   }
 
   @Nullable
   public ItemStack getItemInUse() {
-    return isHandActive ? null : equipment.getItemInMainHand();
+    return isHandActive.getBooleanValue() ? null : equipment.getItemInMainHand();
+  }
+
+  @Override
+  @Deprecated
+  public int getExpToLevel() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public float getAttackCooldown() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean discoverRecipe(@NotNull NamespacedKey namespacedKey) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int discoverRecipes(@NotNull Collection<NamespacedKey> collection) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean undiscoverRecipe(@NotNull NamespacedKey namespacedKey) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int undiscoverRecipes(@NotNull Collection<NamespacedKey> collection) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public boolean hasDiscoveredRecipe(@NotNull NamespacedKey namespacedKey) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @NotNull
+  @Override
+  @Deprecated
+  public Set<NamespacedKey> getDiscoveredRecipes() {
+    throw new ServerSideMethodNotSupported();
   }
 
   public Entity getShoulderEntityLeft() {
-    return leftShoulderEntity;
+    return leftShoulderEntity.getValue();
   }
 
   public void setShoulderEntityLeft(@Nullable Entity entity) {
-    this.leftShoulderEntity = setMeta(this.leftShoulderEntity, leftShoulderEntity);
+    setMeta(this.leftShoulderEntity, entity);
   }
 
   @Nullable
   public Entity getShoulderEntityRight() {
-    return rightShoulderEntity;
+    return rightShoulderEntity.getValue();
   }
 
   public void setShoulderEntityRight(@Nullable Entity entity) {
-    this.rightShoulderEntity = setMeta(this.rightShoulderEntity, rightShoulderEntity);
+    setMeta(this.rightShoulderEntity, entity);
+  }
+
+  @Override
+  @Deprecated
+  public boolean dropItem(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public float getExhaustion() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setExhaustion(float v) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public float getSaturation() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setSaturation(float v) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getFoodLevel() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setFoodLevel(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getSaturatedRegenRate() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setSaturatedRegenRate(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getUnsaturatedRegenRate() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setUnsaturatedRegenRate(int i) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public int getStarvationRate() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setStarvationRate(int i) {
+    throw new ServerSideMethodNotSupported();
   }
 
   @Nullable
+  @Override
+  @Deprecated
+  public Location getLastDeathLocation() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override
+  @Deprecated
+  public void setLastDeathLocation(@Nullable Location location) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Deprecated
   public Firework fireworkBoost(@NotNull ItemStack itemStack) {
-    return null;
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
+  @Deprecated
   public PlayerProfile getPlayerProfile() {
-    return null;
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
+  @Deprecated
   public String getDisplayName() {
-    return null;
+    throw new ServerSideMethodNotSupported();
   }
 
+  @Deprecated
   public void setDisplayName(@Nullable String s) {
-
+    throw new ServerSideMethodNotSupported();
   }
 
   @NotNull
+  @Deprecated
   public String getPlayerListName() {
-    return null;
+    throw new ServerSideMethodNotSupported();
   }
 
+  @Deprecated
   public void setPlayerListName(@Nullable String s) {
-
+    throw new ServerSideMethodNotSupported();
   }
 
   public boolean isSneaking() {
-    return pose == Pose.SNEAKING;
+    return pose.getValue() == Pose.SNEAKING;
   }
 
   public void setSneaking(boolean b) {
-    setPose(Pose.SNEAKING);
+    pose.setValue(Pose.SNEAKING);
   }
 
   @Override
@@ -221,30 +500,30 @@ public class ClientPlayer extends ClientLivingEntity {
   }
 
   public void setCapeEnabled(boolean capeEnabled) {
-    this.capeEnabled = setMeta(this.capeEnabled, capeEnabled);
+    setMeta(this.capeEnabled, capeEnabled);
   }
 
   public void setJacketEnabled(boolean jacketEnabled) {
-    this.jacketEnabled = setMeta(this.jacketEnabled, jacketEnabled);
+    setMeta(this.jacketEnabled, jacketEnabled);
   }
 
   public void setLeftSleeveEnabled(boolean leftSleeveEnabled) {
-    this.leftSleeveEnabled = setMeta(this.leftSleeveEnabled, leftSleeveEnabled);
+    setMeta(this.leftSleeveEnabled, leftSleeveEnabled);
   }
 
   public void setRightSleeveEnabled(boolean rightSleeveEnabled) {
-    this.rightSleeveEnabled = setMeta(this.rightSleeveEnabled, rightSleeveEnabled);
+    setMeta(this.rightSleeveEnabled, rightSleeveEnabled);
   }
 
   public void setLeftPantsEnabled(boolean leftPantsEnabled) {
-    this.leftPantsEnabled = setMeta(this.leftPantsEnabled, leftPantsEnabled);
+    setMeta(this.leftPantsEnabled, leftPantsEnabled);
   }
 
   public void setRightPantsEnabled(boolean rightPantsEnabled) {
-    this.rightPantsEnabled = setMeta(this.rightPantsEnabled, rightPantsEnabled);
+    setMeta(this.rightPantsEnabled, rightPantsEnabled);
   }
 
   public void setHatEnabled(boolean hatEnabled) {
-    this.hatEnabled = setMeta(this.hatEnabled, hatEnabled);
+    setMeta(this.hatEnabled, hatEnabled);
   }
 }

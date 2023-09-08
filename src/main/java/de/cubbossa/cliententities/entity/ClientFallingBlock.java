@@ -1,17 +1,19 @@
 package de.cubbossa.cliententities.entity;
 
 import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.ServerSideMethodNotSupported;
+import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.FallingBlock;
 import org.jetbrains.annotations.NotNull;
 
-@Getter
-public class ClientFallingBlock extends ClientEntity {
+public class ClientFallingBlock extends ClientEntity implements FallingBlock {
 
-  BlockData blockData = Material.SAND.createBlockData();
+  TrackedField<BlockData> blockData = new TrackedField<>(Material.SAND.createBlockData());
 
   public ClientFallingBlock(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.FALLING_BLOCK);
@@ -19,15 +21,71 @@ public class ClientFallingBlock extends ClientEntity {
 
   @Override
   int data() {
-    return SpigotConversionUtil.fromBukkitBlockData(blockData).getGlobalId();
+    return SpigotConversionUtil.fromBukkitBlockData(blockData.getValue()).getGlobalId();
   }
 
   public void setBlockData(BlockData blockData) {
-    this.blockData = setMeta(this.blockData, blockData);
+    setMeta(this.blockData, blockData);
   }
 
   @NotNull
   public Material getMaterial() {
-    return blockData.getMaterial();
+    return blockData.getValue().getMaterial();
+  }
+
+  @NotNull
+  @Override
+  public BlockData getBlockData() {
+    return blockData.getValue();
+  }
+
+  @Override  @Deprecated
+  public boolean getDropItem() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public void setDropItem(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public boolean getCancelDrop() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public void setCancelDrop(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public boolean canHurtEntities() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public void setHurtEntities(boolean b) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public float getDamagePerBlock() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public void setDamagePerBlock(float v) {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public int getMaxDamage() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Override  @Deprecated
+  public void setMaxDamage(int i) {
+    throw new ServerSideMethodNotSupported();
   }
 }

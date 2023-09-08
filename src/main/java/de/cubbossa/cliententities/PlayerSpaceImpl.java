@@ -1,7 +1,7 @@
 package de.cubbossa.cliententities;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.PacketEventsAPI;
+import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -15,10 +15,10 @@ import org.bukkit.entity.*;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -41,6 +41,8 @@ public class PlayerSpaceImpl implements PlayerSpace {
     classConversion.put(ThrownPotion.class, ClientThrownPotion.class);
     classConversion.put(FallingBlock.class, ClientFallingBlock.class);
     classConversion.put(Snowball.class, ClientSnowball.class);
+    classConversion.put(Villager.class, ClientVillager.class);
+    classConversion.put(LeashHitch.class, ClientLeashHitch.class);
   }
 
   EntityIdGenerator entityIdGenerator = EntityIdProvider.get();
@@ -50,9 +52,10 @@ public class PlayerSpaceImpl implements PlayerSpace {
   Map<Class<? extends Event>, Map<UUID, Consumer<Event>>> listeners;
 
   PlayerSpaceImpl(Collection<UUID> players, boolean defaultListener) {
-    this.players = new HashSet<>(players);
-    this.entities = new HashMap<>();
-    listeners = new HashMap<>();
+    this.players = ConcurrentHashMap.newKeySet();
+    this.players.addAll(players);
+    this.entities = new ConcurrentHashMap<>();
+    this.listeners = new ConcurrentHashMap<>();
 
     if (defaultListener) {
       clientEntityListener = new ClientEntityListener(Executors.newSingleThreadExecutor(), this);
@@ -77,11 +80,10 @@ public class PlayerSpaceImpl implements PlayerSpace {
     players.add(player.getUniqueId());
     Collection<Player> singletonList = Collections.singletonList(player);
     entities.values().stream()
-        .filter(e -> !e.isAliveChanged())
+        .filter(e -> !e.isDead())
         .forEach(clientEntity -> {
-          clientEntity.setAliveChanged(true);
-          clientEntity.announce(singletonList);
-          clientEntity.setAliveChanged(false);
+          handleUpdateInfoList(clientEntity.spawn(false), singletonList);
+          handleUpdateInfoList(clientEntity.state(false), singletonList);
         });
   }
 
@@ -184,40 +186,38 @@ public class PlayerSpaceImpl implements PlayerSpace {
   }
 
   @Override
-  public void announceEntityRemovals() {
-    int[] ids = entities.values().stream()
-        .filter(e -> e.isAliveChanged() && e.isDead())
-        .peek(e -> e.setAliveChanged(false))
-        .mapToInt(ClientEntity::getEntityId)
-        .toArray();
-
-    PacketEventsAPI<?> api = PacketEvents.getAPI();
-
-    for (Player player : getPlayers()) {
-
-      api.getPlayerManager().sendPacket(player,
-          new WrapperPlayServerDestroyEntities(ids)
-      );
-    }
-    for (int id : ids) {
-      releaseEntity(id);
-    }
-  }
-
-  @Override
   public void announce() {
-    Collection<Player> c = getPlayers();
+    Collection<Player> players = getPlayers();
     entities.values().stream()
-        .map(entity -> (UntickedEntity) entity)
-        .forEach(entity -> entity.announce(c));
+        .map(entity -> (ClientViewElement) entity)
+        .peek(entity -> handleUpdateInfoList(entity.spawn(true), players))
+        .peek(entity -> handleUpdateInfoList(entity.state(true), players))
+        .forEach(entity -> handleUpdateInfoList(entity.delete(true), players));
   }
 
-  @Override
-  public void announce(Entity e) {
-    if (!(e instanceof UntickedEntity untickedEntity)) {
-      throw new IllegalArgumentException("Entity is no client side entity: " + e.getEntityId());
+  private void handleUpdateInfoList(List<ClientViewElement.UpdateInfo> list, Collection<Player> players) {
+    List<PacketWrapper<?>> wrappers = list.stream()
+        .filter(updateInfo -> updateInfo instanceof ClientViewElement.PacketInfo)
+        .map(updateInfo -> (ClientViewElement.PacketInfo) updateInfo)
+        .map(ClientViewElement.PacketInfo::wrapper)
+        .collect(Collectors.toList());
+
+    List<ClientViewElement.CombineInfo> combines = list.stream()
+        .filter(updateInfo -> updateInfo instanceof ClientViewElement.CombineInfo)
+        .map(updateInfo -> (ClientViewElement.CombineInfo) updateInfo)
+        .collect(Collectors.toList());
+    if (!combines.isEmpty()) {
+      ClientViewElement.CombineInfo first = combines.remove(0);
+      while (!combines.isEmpty()) {
+        ClientViewElement.CombineInfo info = combines.remove(0);
+        first = first.merge(info);
+      }
+      wrappers.add(first.wrapper());
     }
-    untickedEntity.announce(getPlayers());
+    var pm = PacketEvents.getAPI().getPlayerManager();
+    for(Player player : players) {
+      wrappers.forEach(p -> pm.sendPacket(p, player));
+    }
   }
 
   @Override
@@ -226,5 +226,4 @@ public class PlayerSpaceImpl implements PlayerSpace {
         .map(Bukkit::getPlayer)
         .collect(Collectors.toList());
   }
-
 }
