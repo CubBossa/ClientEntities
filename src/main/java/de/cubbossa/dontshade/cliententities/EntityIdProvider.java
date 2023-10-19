@@ -30,26 +30,34 @@ public class EntityIdProvider implements EntityIdGenerator {
   @Override
   public boolean isClaimed(int id) {
     lock.readLock().lock();
-    boolean val = id < entityId || !freeIds.contains(id);
-    lock.readLock().unlock();
-    return val;
+    try {
+      return id < entityId || !freeIds.contains(id);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   @Override
   public int nextEntityId() {
     lock.writeLock().lock();
-    Integer present = freeIds.pollFirst();
-    if (present == null) {
-      return entityId--;
+    try {
+      Integer present = freeIds.pollFirst();
+      if (present == null) {
+        return entityId--;
+      }
+      return present;
+    } finally {
+      lock.writeLock().unlock();
     }
-    lock.writeLock().unlock();
-    return present;
   }
 
   @Override
   public void releaseEntityId(int id) {
     lock.writeLock().lock();
-    freeIds.add(id);
-    lock.writeLock().unlock();
+    try {
+      freeIds.add(id);
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 }

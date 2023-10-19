@@ -30,6 +30,6 @@ public class TrackedMask {
         .filter(e -> e.getKey().getValue())
         .map(Map.Entry::getValue)
         .reduce((a, b) -> (byte) (a | b))
-        .orElseThrow();
+        .orElse((byte) 0);
   }
 }

@@ -10,6 +10,10 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 public class ClientExperienceOrb extends ClientEntity implements ExperienceOrb {
 
   final int count;
@@ -21,8 +25,8 @@ public class ClientExperienceOrb extends ClientEntity implements ExperienceOrb {
   }
 
   @Override
-  PacketWrapper<?> spawnPacket() {
-    return new WrapperPlayServerSpawnExperienceOrb(entityId, location.getX(), location.getY(), location.getZ(), (short) count);
+  List<PacketWrapper<?>> spawnPacket() {
+    return Collections.singletonList(new WrapperPlayServerSpawnExperienceOrb(entityId, location.getX(), location.getY(), location.getZ(), (short) count));
   }
 
   @Override

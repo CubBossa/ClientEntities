@@ -30,7 +30,7 @@ public class ClientAbstractVillager extends ClientAgeableMob implements Abstract
     List<EntityData> metaData() {
         List<EntityData> data = super.metaData();
         if (headShakeTimer.hasChanged()) {
-            data.add(new EntityData(17, EntityDataTypes.INT, headShakeTimer));
+            data.add(new EntityData(17, EntityDataTypes.INT, headShakeTimer.getValue()));
             headShakeTimer.flushChanged();
         }
         return data;

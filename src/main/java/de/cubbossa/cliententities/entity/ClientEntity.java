@@ -12,7 +12,10 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Pose;
+import org.bukkit.entity.SpawnCategory;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.MetadataValue;
@@ -109,15 +112,16 @@ public class ClientEntity implements ClientViewElement, Entity {
   public List<UpdateInfo> spawn(boolean onlyIfChanged) {
     if (!onlyIfChanged || alive.hasChanged() && alive.getBooleanValue()) {
       alive.flushChanged();
-      return Collections.singletonList(PacketInfo.packet(spawnPacket()));
+      return spawnPacket().stream().map(PacketInfo::packet).collect(Collectors.toList());
     }
     return Collections.emptyList();
   }
 
-  PacketWrapper<?> spawnPacket() {
-    return new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
+  List<PacketWrapper<?>> spawnPacket() {
+    return Collections.singletonList(new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
         new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
-        Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getValue().getX(), velocity.getValue().getY(), velocity.getValue().getZ())));
+        Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getValue().getX(), velocity.getValue().getY(), velocity.getValue().getZ()))
+    ));
   }
 
   @Override
@@ -143,9 +147,9 @@ public class ClientEntity implements ClientViewElement, Entity {
 
     // Change location
     if (location != null && !location.equals(previousLocation)) {
-      if (location.toVector().equals(previousLocation.toVector())) {
+      if (previousLocation != null && location.toVector().equals(previousLocation.toVector())) {
         result.add(PacketInfo.packet(new WrapperPlayServerEntityRotation(entityId, location.getYaw(), location.getPitch(), true)));
-      } else if (location.distanceSquared(previousLocation) < 64) {
+      } else if (previousLocation != null && location.distanceSquared(previousLocation) < 64) {
         if (location.getDirection().equals(previousLocation.getDirection())) {
           result.add(PacketInfo.packet(new WrapperPlayServerEntityRelativeMove(entityId,
               location.getX() - previousLocation.getX(),
@@ -169,7 +173,7 @@ public class ClientEntity implements ClientViewElement, Entity {
         ));
       }
 
-      previousLocation = location;
+      previousLocation = location.clone();
     }
 
     // change velocity
@@ -242,6 +246,14 @@ public class ClientEntity implements ClientViewElement, Entity {
     if (field.hasChanged()) {
       metaChanged = true;
     }
+  }
+
+  public void setHeight(double height) {
+    this.height.setValue(height);
+  }
+
+  public void setWidth(double width) {
+    this.width.setValue(width);
   }
 
   public void setCustomName(Component customName) {

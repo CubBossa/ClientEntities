@@ -14,15 +14,9 @@ public class ClientGuardianBeam extends ClientGuardian {
   TrackedField<@Nullable Integer> targetEntityId = new TrackedField<>();
   @Nullable ClientBlockDisplay artificialTarget = null;
 
-  public ClientGuardianBeam(PlayerSpaceImpl playerSpace, int entityId, Entity target) {
+  public ClientGuardianBeam(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId);
-    invisible.setValue(false);
-    setTargetEntity(target);
-  }
-  public ClientGuardianBeam(PlayerSpaceImpl playerSpace, int entityId, Location target) {
-    super(playerSpace, entityId);
-    invisible.setValue(false);
-    setTargetLocation(target);
+    invisible.setValue(true);
   }
 
   public void setStartLocation(Location location) {
@@ -31,7 +25,7 @@ public class ClientGuardianBeam extends ClientGuardian {
 
   public void setTargetLocation(Location location) {
     if (artificialTarget == null) {
-      artificialTarget = playerSpace.spawn(location, BlockDisplay.class);
+      artificialTarget = playerSpace.spawn(location, ClientVillager.class);
       artificialTarget.setViewRange(0);
     } else {
       artificialTarget.teleport(location);

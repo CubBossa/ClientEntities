@@ -363,10 +363,7 @@ public abstract class ClientLivingEntity extends ClientDamageable implements Liv
   }
 
   public void playHurtAnimation(float v) {
-    statelessEffect.add(() -> {
-      // TODO yaw -> v
-      return PacketInfo.packet(new WrapperPlayServerHurtAnimation());
-    });
+    statelessEffect.add(() -> PacketInfo.packet(new WrapperPlayServerHurtAnimation(entityId, v)));
   }
 
   @Override  @Deprecated

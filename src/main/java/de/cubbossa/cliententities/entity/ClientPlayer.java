@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnPlayer;
 import de.cubbossa.cliententities.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import net.kyori.adventure.text.Component;
@@ -18,7 +19,10 @@ import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
 
@@ -51,7 +55,7 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
   }
 
   @Override
-  PacketWrapper<?> spawnPacket() {
+  List<PacketWrapper<?>> spawnPacket() {
     WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
         new UserProfile(uniqueId, name.getValue()),
         displayInTab.getBooleanValue(),
@@ -60,49 +64,52 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
         tabName.getValue(),
         null
     );
-    return new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
-        WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER
-    ), data);
+    return List.of(
+        new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER), data),
+        new WrapperPlayServerSpawnPlayer(entityId, uniqueId, SpigotConversionUtil.fromBukkitLocation(location), metaData())
+    );
   }
 
   @Override
   public List<UpdateInfo> state(boolean onlyIfChanged) {
     List<UpdateInfo> info = super.state(onlyIfChanged);
 
-    WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
-        new UserProfile(uniqueId, name),
-        displayInTab,
-        pingDisplay,
-        SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay),
-        displayName,
-        null
-    );
-    info.add(PacketInfo.packet(
-        new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
-            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY,
-            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
-            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
-            WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_DISPLAY_NAME
-        ), data)
-    ));
+    if (displayInTab.hasChanged() || pingDisplay.hasChanged() || gameModeDisplay.hasChanged() || tabName.hasChanged()) {
+      WrapperPlayServerPlayerInfoUpdate.PlayerInfo data = new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(
+          new UserProfile(uniqueId, name.getValue()),
+          displayInTab.getBooleanValue(),
+          pingDisplay.getValue(),
+          SpigotConversionUtil.fromBukkitGameMode(gameModeDisplay.getValue()),
+          tabName.getValue(),
+          null
+      );
+      info.add(PacketInfo.packet(
+          new WrapperPlayServerPlayerInfoUpdate(EnumSet.of(
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
+              WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_DISPLAY_NAME
+          ), data)
+      ));
+    }
 
     return info;
   }
 
   public void setDisplayInTab(boolean displayInTab) {
-    this.displayInTab = displayInTab;
+    this.displayInTab.setValue(displayInTab);
   }
 
   public void setGameModeDisplay(GameMode gameModeDisplay) {
-    this.gameModeDisplay = gameModeDisplay;
+    this.gameModeDisplay.setValue(gameModeDisplay);
   }
 
   public void setPingDisplay(int pingDisplay) {
-    this.pingDisplay = pingDisplay;
+    this.pingDisplay.setValue(pingDisplay);
   }
 
   public void setDisplayName(Component displayName) {
-    this.displayName = displayName;
+    this.displayName.setValue(displayName);
   }
 
   @Override
@@ -273,12 +280,12 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
   @NotNull
   @Override
   public GameMode getGameMode() {
-    return gameModeDisplay;
+    return gameModeDisplay.getValue();
   }
 
   @Override
   public void setGameMode(@NotNull GameMode gameMode) {
-    this.gameModeDisplay = gameMode;
+    this.gameModeDisplay.setValue(gameMode);
   }
 
 

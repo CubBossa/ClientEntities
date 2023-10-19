@@ -88,7 +88,8 @@ public class ClientVillager extends ClientAbstractVillager implements Villager {
     }
 
     public void shakeHead() {
-    setMeta(this.headShakeTimer, 40);
+        setMeta(this.headShakeTimer, 40);
+        this.headShakeTimer.overrideChanged(true);
     }
 
     @Nullable
@@ -98,7 +99,8 @@ public class ClientVillager extends ClientAbstractVillager implements Villager {
     }
 
     public void shakeHead(int ticks) {
-    setMeta(this.headShakeTimer, ticks);
+        setMeta(this.headShakeTimer, ticks);
+        this.headShakeTimer.overrideChanged(true);
     }
 
     public void happy() {

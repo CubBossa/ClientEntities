@@ -48,7 +48,7 @@ public class ClientFireWork extends ClientEntity implements Firework {
 
   @NotNull
   public FireworkMeta getFireworkMeta() {
-    if (fireWorkInfo == null) {
+    if (fireWorkInfo.getValue() == null) {
       fireWorkInfo.setValue(new ItemStack(Material.FIREWORK_ROCKET));
     }
     if (fireWorkInfo.getValue().getType() != Material.FIREWORK_ROCKET) {
@@ -62,7 +62,7 @@ public class ClientFireWork extends ClientEntity implements Firework {
   }
 
   public void setFireworkMeta(@NotNull FireworkMeta fireworkMeta) {
-    if (fireWorkInfo == null) {
+    if (fireWorkInfo.getValue() == null) {
       fireWorkInfo.setValue(new ItemStack(Material.FIREWORK_ROCKET));
     }
     if (fireWorkInfo.getValue().getType() != Material.FIREWORK_ROCKET) {

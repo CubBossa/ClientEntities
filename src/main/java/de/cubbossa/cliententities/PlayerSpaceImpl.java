@@ -32,6 +32,7 @@ public class PlayerSpaceImpl implements PlayerSpace {
     classConversion.put(BlockDisplay.class, ClientBlockDisplay.class);
     classConversion.put(TextDisplay.class, ClientTextDisplay.class);
     classConversion.put(Interaction.class, ClientInteraction.class);
+    classConversion.put(Squid.class, ClientSquid.class);
     classConversion.put(EnderPearl.class, ClientEnderPearl.class);
     classConversion.put(Firework.class, ClientFireWork.class);
     classConversion.put(EnderSignal.class, ClientEyeOfEnder.class);
@@ -141,6 +142,20 @@ public class PlayerSpaceImpl implements PlayerSpace {
   }
 
   @Override
+  public ClientGuardianBeam spawnGuardianBeam(Location location, Location target) {
+    ClientGuardianBeam beam = spawnClient(location, ClientGuardianBeam.class);
+    beam.setTargetLocation(target);
+    return beam;
+  }
+
+  @Override
+  public ClientGuardianBeam spawnGuardianBeam(Location location, Entity target) {
+    ClientGuardianBeam beam = spawnClient(location, ClientGuardianBeam.class);
+    beam.setTargetEntity(target);
+    return beam;
+  }
+
+  @Override
   public ClientExperienceOrb spawnExpOrb(Location location, short count) {
     ClientExperienceOrb orb = new ClientExperienceOrb(this, entityIdGenerator.nextEntityId(), location, count);
     entities.put(orb.getEntityId(), orb);
@@ -153,8 +168,12 @@ public class PlayerSpaceImpl implements PlayerSpace {
     if (mapping == null) {
       throw new IllegalArgumentException("No client entity implementation for entity type " + type + ".");
     }
+    return spawnClient(location, mapping);
+  }
+
+  public <C extends ClientEntity> C spawnClient(Location location, Class<C> type) {
     try {
-      Constructor<?> constructor = mapping.getConstructor(PlayerSpaceImpl.class, int.class);
+      Constructor<?> constructor = type.getConstructor(PlayerSpaceImpl.class, int.class);
       C entity = (C) constructor.newInstance(this, entityIdGenerator.nextEntityId());
       entities.put(entity.getEntityId(), entity);
       entity.teleport(location);
@@ -216,7 +235,7 @@ public class PlayerSpaceImpl implements PlayerSpace {
     }
     var pm = PacketEvents.getAPI().getPlayerManager();
     for(Player player : players) {
-      wrappers.forEach(p -> pm.sendPacket(p, player));
+      wrappers.forEach(p -> pm.sendPacket(player, p));
     }
   }
 

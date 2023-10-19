@@ -1,9 +1,6 @@
 package de.cubbossa.cliententities;
 
-import de.cubbossa.cliententities.entity.ClientEntity;
-import de.cubbossa.cliententities.entity.ClientExperienceOrb;
-import de.cubbossa.cliententities.entity.ClientFallingBlock;
-import de.cubbossa.cliententities.entity.ClientPlayer;
+import de.cubbossa.cliententities.entity.*;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
@@ -45,8 +42,13 @@ public interface PlayerSpace extends Closeable {
 
   ClientFallingBlock spawnFallingBlock(Location location, BlockData blockData);
 
+  ClientGuardianBeam spawnGuardianBeam(Location location, Location target);
+
+  ClientGuardianBeam spawnGuardianBeam(Location location, Entity target);
+
   <E extends Entity, C extends ClientEntity> C spawn(Location location, Class<E> type);
 
+  <C extends ClientEntity> C spawnClient(Location location, Class<C> type);
 
   // Events
 
@@ -118,21 +120,24 @@ public interface PlayerSpace extends Closeable {
     }
 
     public PlayerSpaceImpl build() {
-      Timer timer = new Timer();
-      PlayerSpaceImpl playerSpace = new PlayerSpaceImpl(ids, events) {
-        @Override
-        public void close() throws IOException {
-          super.close();
-          timer.cancel();
-        }
-      };
-      timer.scheduleAtFixedRate(new TimerTask() {
-        @Override
-        public void run() {
-          playerSpace.announce();
-        }
-      }, period, period);
-      return playerSpace;
+      if (period >= 1) {
+        Timer timer = new Timer();
+        PlayerSpaceImpl playerSpace = new PlayerSpaceImpl(ids, events) {
+          @Override
+          public void close() throws IOException {
+            super.close();
+            timer.cancel();
+          }
+        };
+        timer.scheduleAtFixedRate(new TimerTask() {
+          @Override
+          public void run() {
+            playerSpace.announce();
+          }
+        }, period, period);
+        return playerSpace;
+      }
+      return new PlayerSpaceImpl(ids, events);
     }
   }
 
