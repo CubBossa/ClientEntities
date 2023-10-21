@@ -5,7 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
-import lombok.Getter;
+import de.cubbossa.cliententities.entitydata.DisplayMetaDataWrapper;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.EntityType;
@@ -45,12 +45,14 @@ public class ClientDisplay extends ClientEntity implements Display {
 
   public void setTransformation(@NotNull Transformation transformation) {
     setMeta(this.transformation, transformation);
+    this.transformation.overrideChanged(true);
   }
 
   public void setTransformationMatrix(@NotNull Matrix4f transformationMatrix) {
     transformationMatrix.getTranslation(this.transformation.getValue().getTranslation());
     transformationMatrix.getScale(this.transformation.getValue().getScale());
     transformationMatrix.getUnnormalizedRotation(this.transformation.getValue().getLeftRotation());
+    this.transformation.overrideChanged(true);
     metaChanged = true;
   }
 
@@ -151,42 +153,49 @@ public class ClientDisplay extends ClientEntity implements Display {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (interpolationDelay.hasChanged()) {
-      data.add(new EntityData(8, EntityDataTypes.INT, interpolationDelay.getValue()));
+      data.add(new DisplayMetaDataWrapper.InterpolationDelay(interpolationDelay.getValue()));
     }
     if (interpolationDuration.hasChanged()) {
-      data.add(new EntityData(9, EntityDataTypes.INT, interpolationDuration.getValue()));
+      data.add(new DisplayMetaDataWrapper.InterpolationDuration(interpolationDuration.getValue()));
     }
     if (transformation.hasChanged()) {
-      data.add(new EntityData(10, EntityDataTypes.VECTOR3F, convert(transformation.getValue().getTranslation())));
-      data.add(new EntityData(11, EntityDataTypes.VECTOR3F, convert(transformation.getValue().getScale())));
-      data.add(new EntityData(12, EntityDataTypes.QUATERNION, convert(transformation.getValue().getLeftRotation())));
-      data.add(new EntityData(13, EntityDataTypes.QUATERNION, convert(transformation.getValue().getRightRotation())));
+      data.add(new DisplayMetaDataWrapper.Translation(convert(transformation.getValue().getTranslation())));
+      data.add(new DisplayMetaDataWrapper.Scale(convert(transformation.getValue().getScale())));
+      data.add(new DisplayMetaDataWrapper.LeftRotation(convert(transformation.getValue().getLeftRotation())));
+      data.add(new DisplayMetaDataWrapper.RightRotation(convert(transformation.getValue().getRightRotation())));
+      transformation.flushChanged();
     }
     if (billboard.hasChanged()) {
       data.add(new EntityData(14, EntityDataTypes.BYTE, (byte) billboard.getValue().ordinal()));
     }
     if (brightness.hasChanged()) {
-      data.add(new EntityData(15, EntityDataTypes.INT, brightness.getValue() == null
-          ? -1 : brightness.getValue().getBlockLight() << 4 | brightness.getValue().getSkyLight() << 20));
+      if (brightness.getValue() == null) {
+        data.add(new DisplayMetaDataWrapper.BrightnessOverride());
+      } else {
+        data.add(new DisplayMetaDataWrapper.BrightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
+      }
     }
     if (viewRange.hasChanged()) {
-      data.add(new EntityData(16, EntityDataTypes.FLOAT, viewRange.getValue()));
+      data.add(new DisplayMetaDataWrapper.ViewRange(viewRange.getValue()));
     }
     if (shadowRadius.hasChanged()) {
-      data.add(new EntityData(17, EntityDataTypes.FLOAT, shadowRadius.getValue()));
+      data.add(new DisplayMetaDataWrapper.ShadowRadius(shadowRadius.getValue()));
     }
     if (shadowStrength.hasChanged()) {
-      data.add(new EntityData(18, EntityDataTypes.FLOAT, shadowStrength.getValue()));
+      data.add(new DisplayMetaDataWrapper.ShadowStrength(shadowStrength.getValue()));
     }
     if (displayWidth.hasChanged()) {
-      data.add(new EntityData(19, EntityDataTypes.FLOAT, displayWidth.getValue()));
+      data.add(new DisplayMetaDataWrapper.Width(displayWidth.getValue()));
     }
     if (displayHeight.hasChanged()) {
-      data.add(new EntityData(20, EntityDataTypes.FLOAT, displayHeight.getValue()));
+      data.add(new DisplayMetaDataWrapper.Height(displayHeight.getValue()));
     }
     if (glowColorOverride.hasChanged()) {
-      data.add(new EntityData(21, EntityDataTypes.INT, glowColorOverride.getValue() == null
-          ? -1 : glowColorOverride.getValue().asRGB()));
+      if (glowColorOverride.getValue() == null) {
+        data.add(new DisplayMetaDataWrapper.GlowColorOverride());
+      } else {
+        data.add(new DisplayMetaDataWrapper.GlowColorOverride(glowColorOverride.getValue()));
+      }
     }
     return data;
   }

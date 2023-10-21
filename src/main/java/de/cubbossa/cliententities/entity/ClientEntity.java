@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import de.cubbossa.cliententities.*;
+import de.cubbossa.cliententities.entitydata.RemainingAirEntityDataWrapper;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -220,7 +221,8 @@ public class ClientEntity implements ClientViewElement, Entity {
       data.add(new EntityData(0, EntityDataTypes.BYTE, metaMask.byteVal()));
     }
     if (airTicks.hasChanged()) {
-      data.add(new EntityData(1, EntityDataTypes.INT, airTicks));
+      data.add(new RemainingAirEntityDataWrapper(airTicks.getValue()));
+      data.add(new EntityData(1, EntityDataTypes.INT, airTicks.getValue()));
     }
     // data.add(new EntityData(2, EntityDataTypes.OPTIONAL_COMPONENT, Optional.ofNullable(getCustomName())));
     if (customNameVisible.hasChanged()) {
