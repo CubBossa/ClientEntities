@@ -5,7 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
-import de.cubbossa.cliententities.entitydata.DisplayMetaDataWrapper;
+import de.cubbossa.cliententities.entitydata.DisplayDataWrapper;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.EntityType;
@@ -153,16 +153,16 @@ public class ClientDisplay extends ClientEntity implements Display {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (interpolationDelay.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.InterpolationDelay(interpolationDelay.getValue()));
+      data.add(new DisplayDataWrapper.InterpolationDelay(interpolationDelay.getValue()));
     }
     if (interpolationDuration.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.InterpolationDuration(interpolationDuration.getValue()));
+      data.add(new DisplayDataWrapper.InterpolationDuration(interpolationDuration.getValue()));
     }
     if (transformation.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.Translation(convert(transformation.getValue().getTranslation())));
-      data.add(new DisplayMetaDataWrapper.Scale(convert(transformation.getValue().getScale())));
-      data.add(new DisplayMetaDataWrapper.LeftRotation(convert(transformation.getValue().getLeftRotation())));
-      data.add(new DisplayMetaDataWrapper.RightRotation(convert(transformation.getValue().getRightRotation())));
+      data.add(new DisplayDataWrapper.Translation(convert(transformation.getValue().getTranslation())));
+      data.add(new DisplayDataWrapper.Scale(convert(transformation.getValue().getScale())));
+      data.add(new DisplayDataWrapper.LeftRotation(convert(transformation.getValue().getLeftRotation())));
+      data.add(new DisplayDataWrapper.RightRotation(convert(transformation.getValue().getRightRotation())));
       transformation.flushChanged();
     }
     if (billboard.hasChanged()) {
@@ -170,31 +170,31 @@ public class ClientDisplay extends ClientEntity implements Display {
     }
     if (brightness.hasChanged()) {
       if (brightness.getValue() == null) {
-        data.add(new DisplayMetaDataWrapper.BrightnessOverride());
+        data.add(new DisplayDataWrapper.BrightnessOverride());
       } else {
-        data.add(new DisplayMetaDataWrapper.BrightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
+        data.add(new DisplayDataWrapper.BrightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
       }
     }
     if (viewRange.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.ViewRange(viewRange.getValue()));
+      data.add(new DisplayDataWrapper.ViewRange(viewRange.getValue()));
     }
     if (shadowRadius.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.ShadowRadius(shadowRadius.getValue()));
+      data.add(new DisplayDataWrapper.ShadowRadius(shadowRadius.getValue()));
     }
     if (shadowStrength.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.ShadowStrength(shadowStrength.getValue()));
+      data.add(new DisplayDataWrapper.ShadowStrength(shadowStrength.getValue()));
     }
     if (displayWidth.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.Width(displayWidth.getValue()));
+      data.add(new DisplayDataWrapper.Width(displayWidth.getValue()));
     }
     if (displayHeight.hasChanged()) {
-      data.add(new DisplayMetaDataWrapper.Height(displayHeight.getValue()));
+      data.add(new DisplayDataWrapper.Height(displayHeight.getValue()));
     }
     if (glowColorOverride.hasChanged()) {
       if (glowColorOverride.getValue() == null) {
-        data.add(new DisplayMetaDataWrapper.GlowColorOverride());
+        data.add(new DisplayDataWrapper.GlowColorOverride());
       } else {
-        data.add(new DisplayMetaDataWrapper.GlowColorOverride(glowColorOverride.getValue()));
+        data.add(new DisplayDataWrapper.GlowColorOverride(glowColorOverride.getValue()));
       }
     }
     return data;

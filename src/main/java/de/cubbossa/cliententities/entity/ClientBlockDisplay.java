@@ -1,12 +1,10 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
-import de.cubbossa.cliententities.entitydata.BlockDisplayMetaDataWrapper;
+import de.cubbossa.cliententities.entitydata.BlockDisplayDataWrapper;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
@@ -36,7 +34,7 @@ public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
   @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    data.add(new BlockDisplayMetaDataWrapper.Block(SpigotConversionUtil.fromBukkitBlockData(block.getValue())));
+    data.add(new BlockDisplayDataWrapper.Block(SpigotConversionUtil.fromBukkitBlockData(block.getValue())));
     return data;
   }
 }

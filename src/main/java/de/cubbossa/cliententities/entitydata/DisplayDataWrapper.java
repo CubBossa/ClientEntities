@@ -8,11 +8,11 @@ import org.bukkit.entity.Display;
 
 import java.awt.*;
 
-public class DisplayMetaDataWrapper {
+public class DisplayDataWrapper extends EntityDataWrapper {
 
-    private DisplayMetaDataWrapper() {}
+    protected DisplayDataWrapper() {}
 
-    public static class InterpolationDelay extends EntityDataWrapper {
+    public static class InterpolationDelay extends AbstractEntityDataWrapper {
         public InterpolationDelay(int delay) {
             super(EntityDataTypes.INT, delay);
         }
@@ -26,7 +26,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class InterpolationDuration extends EntityDataWrapper {
+    public static class InterpolationDuration extends AbstractEntityDataWrapper {
         public InterpolationDuration(int duration) {
             super(EntityDataTypes.INT, duration);
         }
@@ -40,7 +40,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class PosRosInterpolationDuration extends EntityDataWrapper {
+    public static class PosRosInterpolationDuration extends AbstractEntityDataWrapper {
         public PosRosInterpolationDuration(int duration) {
             super(EntityDataTypes.INT, duration);
         }
@@ -54,7 +54,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class Translation extends EntityDataWrapper {
+    public static class Translation extends AbstractEntityDataWrapper {
         public Translation(Vector3f translation) {
             super(EntityDataTypes.VECTOR3F, translation);
         }
@@ -71,7 +71,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class Scale extends EntityDataWrapper {
+    public static class Scale extends AbstractEntityDataWrapper {
         public Scale(Vector3f scale) {
             super(EntityDataTypes.VECTOR3F, scale);
         }
@@ -88,7 +88,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class LeftRotation extends EntityDataWrapper {
+    public static class LeftRotation extends AbstractEntityDataWrapper {
         public LeftRotation(Quaternion4f rotation) {
             super(EntityDataTypes.QUATERNION, rotation);
         }
@@ -105,7 +105,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class RightRotation extends EntityDataWrapper {
+    public static class RightRotation extends AbstractEntityDataWrapper {
         public RightRotation(Quaternion4f rotation) {
             super(EntityDataTypes.QUATERNION, rotation);
         }
@@ -122,7 +122,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class BillboardConstraints extends EntityDataWrapper {
+    public static class BillboardConstraints extends AbstractEntityDataWrapper {
         public BillboardConstraints(byte billboardIndex) {
             super(EntityDataTypes.BYTE, billboardIndex);
         }
@@ -143,7 +143,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class BrightnessOverride extends EntityDataWrapper {
+    public static class BrightnessOverride extends AbstractEntityDataWrapper {
         public BrightnessOverride(int lightValue) {
             super(EntityDataTypes.INT, lightValue);
         }
@@ -168,7 +168,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class ViewRange extends EntityDataWrapper {
+    public static class ViewRange extends AbstractEntityDataWrapper {
         public ViewRange(float chunks) {
             super(EntityDataTypes.FLOAT, chunks);
         }
@@ -185,7 +185,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class ShadowRadius extends EntityDataWrapper {
+    public static class ShadowRadius extends AbstractEntityDataWrapper {
         public ShadowRadius(float size) {
             super(EntityDataTypes.FLOAT, size);
         }
@@ -202,7 +202,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class ShadowStrength extends EntityDataWrapper {
+    public static class ShadowStrength extends AbstractEntityDataWrapper {
         public ShadowStrength(float strength) {
             super(EntityDataTypes.FLOAT, strength);
         }
@@ -219,7 +219,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class Width extends EntityDataWrapper {
+    public static class Width extends AbstractEntityDataWrapper {
         public Width(float width) {
             super(EntityDataTypes.FLOAT, width);
         }
@@ -236,7 +236,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class Height extends EntityDataWrapper {
+    public static class Height extends AbstractEntityDataWrapper {
         public Height(float width) {
             super(EntityDataTypes.FLOAT, width);
         }
@@ -253,7 +253,7 @@ public class DisplayMetaDataWrapper {
         }
     }
 
-    public static class GlowColorOverride extends EntityDataWrapper {
+    public static class GlowColorOverride extends AbstractEntityDataWrapper {
         public GlowColorOverride(Color color) {
             this(color.getRGB());
         }

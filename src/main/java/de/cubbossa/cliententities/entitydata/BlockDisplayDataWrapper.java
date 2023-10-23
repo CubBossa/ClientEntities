@@ -4,8 +4,11 @@ import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.world.states.WrappedBlockState;
 
-public class BlockDisplayMetaDataWrapper {
-    public static class Block extends EntityDataWrapper {
+public class BlockDisplayDataWrapper {
+
+    protected BlockDisplayDataWrapper() {}
+
+    public static class Block extends AbstractEntityDataWrapper {
         public Block(int id) {
             super(EntityDataTypes.BLOCK_STATE, id);
         }
