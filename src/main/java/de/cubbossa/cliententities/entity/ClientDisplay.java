@@ -23,7 +23,7 @@ public class ClientDisplay extends ClientEntity implements Display {
 
   TrackedField<Integer> interpolationDelay = new TrackedField<>(0);
   TrackedField<Integer> interpolationDuration = new TrackedField<>(0);
-  TrackedField<Transformation> transformation = new TrackedField<>(new Transformation(new Vector3f(), new AxisAngle4f(), new Vector3f(1, 1, 1), new AxisAngle4f()));
+  TrackedField<Transformation> transformation = new TrackedField<>(new Transformation(new Vector3f(), new AxisAngle4f(0, 1, 0, 0), new Vector3f(1, 1, 1), new AxisAngle4f(0, 1, 0, 0)));
   TrackedField<Display.Billboard> billboard = new TrackedField<>(Display.Billboard.FIXED);
   TrackedField<Display.@Nullable Brightness> brightness = new TrackedField<>();
   TrackedField<Float> viewRange = new TrackedField<>(1f);

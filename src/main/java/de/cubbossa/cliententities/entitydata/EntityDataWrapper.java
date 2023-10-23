@@ -159,8 +159,8 @@ public class EntityDataWrapper {
   }
 
   public static class FrozenTicks extends AbstractEntityDataWrapper {
-    public FrozenTicks(EntityDataType<?> type, Object value) {
-      super(type, value);
+    public FrozenTicks(int ticks) {
+      super(EntityDataTypes.INT, ticks);
     }
 
     @Override

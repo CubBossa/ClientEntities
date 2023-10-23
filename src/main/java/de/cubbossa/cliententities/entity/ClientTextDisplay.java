@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
+import de.cubbossa.cliententities.entitydata.TextDisplayDataWrapper;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.entity.EntityType;
@@ -106,32 +107,24 @@ public class ClientTextDisplay extends ClientDisplay implements TextDisplay {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (text.hasChanged()) {
-      data.add(new EntityData(22, EntityDataTypes.COMPONENT, text.getValue() == null
-          ? Component.empty()
-          : GSON.serialize(text.getValue())));
+      data.add(new TextDisplayDataWrapper.Text(text.getValue()));
     }
     if (lineWidth.hasChanged()) {
-      data.add(new EntityData(23, EntityDataTypes.INT, lineWidth.getValue()));
+      data.add(new TextDisplayDataWrapper.TextWidth(lineWidth.getValue()));
     }
     if (backgroundColor.hasChanged()) {
-      data.add(new EntityData(24, EntityDataTypes.INT, backgroundColor.getValue() == null
-          ? 0x40000000
-          : backgroundColor.getValue().asARGB()));
+      data.add(new TextDisplayDataWrapper.BackgroundColor(backgroundColor.getValue() == null ? 0x40000000 : backgroundColor.getValue().asARGB()));
     }
     if (textOpacity.hasChanged()) {
-      data.add(new EntityData(25, EntityDataTypes.BYTE, textOpacity.getValue()));
+      data.add(new TextDisplayDataWrapper.TextOpacity(textOpacity.getValue()));
     }
     if (shadowed.hasChanged() || seeThrough.hasChanged() || defaultBackground.hasChanged() || alignment.hasChanged()) {
-      byte mask = (byte) (
-          (shadowed.getBooleanValue() ? 0x01 : 0)
-              | (seeThrough.getBooleanValue() ? 0x02 : 0)
-              | (defaultBackground.getBooleanValue() ? 0x04 : 0)
-              | (switch (alignment.getValue()) {
-            case CENTER -> 0x00;
-            case LEFT -> 0x08;
-            case RIGHT -> 0x10;
-          }));
-      data.add(new EntityData(26, EntityDataTypes.BYTE, mask));
+      data.add(new TextDisplayDataWrapper.Options(
+          shadowed.getValue(),
+          seeThrough.getBooleanValue(),
+          defaultBackground.getBooleanValue(),
+          TextDisplayDataWrapper.TextAlignment.values()[alignment.getValue().ordinal()]
+      ));
     }
     return data;
   }
