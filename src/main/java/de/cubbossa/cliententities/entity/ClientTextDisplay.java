@@ -107,19 +107,19 @@ public class ClientTextDisplay extends ClientDisplay implements TextDisplay {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (text.hasChanged()) {
-      data.add(new TextDisplayDataWrapper.Text(text.getValue()));
+      data.add(TextDisplayDataWrapper.text(text.getValue()));
     }
     if (lineWidth.hasChanged()) {
-      data.add(new TextDisplayDataWrapper.TextWidth(lineWidth.getValue()));
+      data.add(TextDisplayDataWrapper.textWidth(lineWidth.getValue()));
     }
     if (backgroundColor.hasChanged()) {
-      data.add(new TextDisplayDataWrapper.BackgroundColor(backgroundColor.getValue() == null ? 0x40000000 : backgroundColor.getValue().asARGB()));
+      data.add(TextDisplayDataWrapper.backgroundColor(backgroundColor.getValue() == null ? 0x40000000 : backgroundColor.getValue().asARGB()));
     }
     if (textOpacity.hasChanged()) {
-      data.add(new TextDisplayDataWrapper.TextOpacity(textOpacity.getValue()));
+      data.add(TextDisplayDataWrapper.textOpacity(textOpacity.getValue()));
     }
     if (shadowed.hasChanged() || seeThrough.hasChanged() || defaultBackground.hasChanged() || alignment.hasChanged()) {
-      data.add(new TextDisplayDataWrapper.Options(
+      data.add(TextDisplayDataWrapper.options(
           shadowed.getValue(),
           seeThrough.getBooleanValue(),
           defaultBackground.getBooleanValue(),

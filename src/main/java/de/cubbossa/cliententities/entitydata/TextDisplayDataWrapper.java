@@ -1,6 +1,7 @@
 package de.cubbossa.cliententities.entitydata;
 
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import net.kyori.adventure.text.Component;
 
@@ -11,120 +12,118 @@ public class TextDisplayDataWrapper extends DisplayDataWrapper {
   protected TextDisplayDataWrapper() {
   }
 
-  public static class Text extends AbstractEntityDataWrapper {
-    public Text(Component text) {
-      this(SERIALIZER.serialize(text));
-    }
+  public static EntityData text(Component component) {
+    return text(SERIALIZER.serialize(component));
+  }
 
-    public Text(String component) {
-      super(EntityDataTypes.COMPONENT, component);
-    }
+  public static EntityData text(String component) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.COMPONENT, component) {
 
-    @Override
-    protected int versionedIndex() {
-      if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-        return -1;
+      @Override
+      protected int versionedIndex() {
+        if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
+        }
+        if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 23;
+        }
+        return 22;
       }
-      if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+    };
+  }
+
+  public static EntityData textWidth(int width) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, width) {
+
+      @Override
+      protected int versionedIndex() {
+        if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
+        }
+        if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 24;
+        }
         return 23;
       }
-      return 22;
-    }
+    };
   }
 
-  public static class TextWidth extends AbstractEntityDataWrapper {
-    public TextWidth(int width) {
-      super(EntityDataTypes.INT, width);
-    }
+  public static EntityData backgroundColor(Color color) {
+    return backgroundColor(color.getRGB());
+  }
 
-    @Override
-    protected int versionedIndex() {
-      if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-        return -1;
-      }
-      if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+  public static EntityData backgroundColor(org.bukkit.Color color) {
+    return backgroundColor(color.asARGB());
+  }
+
+  public static EntityData backgroundColor() {
+    return backgroundColor(0x40000000);
+  }
+
+  public static EntityData backgroundColor(int argb) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, argb) {
+
+      @Override
+      protected int versionedIndex() {
+        if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
+        }
+        if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 25;
+        }
         return 24;
       }
-      return 23;
-    }
+    };
   }
 
-  public static class BackgroundColor extends AbstractEntityDataWrapper {
-    public BackgroundColor() {
-      this(0x40000000);
-    }
+  public static EntityData textOpacity() {
+    return textOpacity((byte) -1);
+  }
 
-    public BackgroundColor(Color color) {
-      this(color.getRGB());
-    }
+  public static EntityData textOpacity(byte opacity) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.BYTE, opacity) {
 
-    public BackgroundColor(int rgba) {
-      super(EntityDataTypes.INT, rgba);
-    }
-
-    @Override
-    protected int versionedIndex() {
-      if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-        return -1;
-      }
-      if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+      @Override
+      protected int versionedIndex() {
+        if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
+        }
+        if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 26;
+        }
         return 25;
       }
-      return 24;
-    }
+    };
   }
 
-  public static class TextOpacity extends AbstractEntityDataWrapper {
-    public TextOpacity() {
-      this((byte) -1);
-    }
+  public static EntityData options(boolean hasShadow, boolean canSeeThrough, boolean defaultBackground, TextAlignment alignment) {
+    return options((byte) ((hasShadow ? 0x01 : 0)
+        | (canSeeThrough ? 0x02 : 0)
+        | (defaultBackground ? 0x04 : 0)
+        | (switch (alignment) {
+      case CENTER -> 0x00;
+      case LEFT -> 0x08;
+      case RIGHT -> 0x10;
+    })));
+  }
 
-    public TextOpacity(byte opacity) {
-      super(EntityDataTypes.BYTE, opacity);
-    }
+  public static EntityData options(int bitmask) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.BYTE, bitmask) {
 
-    @Override
-    protected int versionedIndex() {
-      if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-        return -1;
-      }
-      if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+      @Override
+      protected int versionedIndex() {
+        if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
+        }
+        if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 27;
+        }
         return 26;
       }
-      return 25;
-    }
+    };
   }
 
-  public static class Options extends AbstractEntityDataWrapper {
-    public Options(boolean hasShadow, boolean canSeeThrough, boolean defaultBackground, TextAlignment alignment) {
-      this((byte) ((hasShadow ? 0x01 : 0)
-          | (canSeeThrough ? 0x02 : 0)
-          | (defaultBackground ? 0x04 : 0)
-          | (switch (alignment) {
-        case CENTER -> 0x00;
-        case LEFT -> 0x08;
-        case RIGHT -> 0x10;
-      })));
-    }
-
-    public Options(byte bitmask) {
-      super(EntityDataTypes.BYTE, bitmask);
-    }
-
-
-    @Override
-    protected int versionedIndex() {
-      if (serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-        return -1;
-      }
-      if (serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-        return 26;
-      }
-      return 25;
+    public enum TextAlignment {
+      CENTER, LEFT, RIGHT
     }
   }
-
-  public enum TextAlignment {
-    CENTER, LEFT, RIGHT
-  }
-}

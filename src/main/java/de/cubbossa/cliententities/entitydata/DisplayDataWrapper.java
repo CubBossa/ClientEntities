@@ -1,6 +1,7 @@
 package de.cubbossa.cliententities.entitydata;
 
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
+import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import com.github.retrooper.packetevents.util.Vector3f;
@@ -10,275 +11,260 @@ import java.awt.*;
 
 public class DisplayDataWrapper extends EntityDataWrapper {
 
-    protected DisplayDataWrapper() {}
+  protected DisplayDataWrapper() {
+  }
 
-    public static class InterpolationDelay extends AbstractEntityDataWrapper {
-        public InterpolationDelay(int delay) {
-            super(EntityDataTypes.INT, delay);
+  public static EntityData interpolationDelay(int delay) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, delay) {
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        return 8;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            return 8;
-        }
-    }
+  public static EntityData interpolationDuration(int duration) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, duration) {
 
-    public static class InterpolationDuration extends AbstractEntityDataWrapper {
-        public InterpolationDuration(int duration) {
-            super(EntityDataTypes.INT, duration);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        return 9;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            return 9;
-        }
-    }
+  public static EntityData posRosInterpolationDuration(int duration) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, duration) {
 
-    public static class PosRosInterpolationDuration extends AbstractEntityDataWrapper {
-        public PosRosInterpolationDuration(int duration) {
-            super(EntityDataTypes.INT, duration);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_20_2)) {
+          return -1;
         }
+        return 10;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_20_2)) {
-                return -1;
-            }
-            return 10;
-        }
-    }
+  public static EntityData translation(Vector3f translation) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.VECTOR3F, translation) {
 
-    public static class Translation extends AbstractEntityDataWrapper {
-        public Translation(Vector3f translation) {
-            super(EntityDataTypes.VECTOR3F, translation);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 11;
+        }
+        return 10;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 11;
-            }
-            return 10;
-        }
-    }
+  public static EntityData scale(Vector3f scale) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.VECTOR3F, scale) {
 
-    public static class Scale extends AbstractEntityDataWrapper {
-        public Scale(Vector3f scale) {
-            super(EntityDataTypes.VECTOR3F, scale);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 12;
+        }
+        return 11;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 12;
-            }
-            return 11;
-        }
-    }
+  public static EntityData leftRotation(Quaternion4f rotation) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.QUATERNION, rotation) {
 
-    public static class LeftRotation extends AbstractEntityDataWrapper {
-        public LeftRotation(Quaternion4f rotation) {
-            super(EntityDataTypes.QUATERNION, rotation);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 13;
+        }
+        return 12;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 13;
-            }
-            return 12;
-        }
-    }
+  public static EntityData rightRotation(Quaternion4f rotation) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.QUATERNION, rotation) {
 
-    public static class RightRotation extends AbstractEntityDataWrapper {
-        public RightRotation(Quaternion4f rotation) {
-            super(EntityDataTypes.QUATERNION, rotation);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 14;
+        }
+        return 13;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 14;
-            }
-            return 13;
-        }
-    }
+  public static EntityData billboardConstraints(Display.Billboard billboard) {
+    return billboardConstraints((byte) billboard.ordinal());
+  }
 
-    public static class BillboardConstraints extends AbstractEntityDataWrapper {
-        public BillboardConstraints(byte billboardIndex) {
-            super(EntityDataTypes.BYTE, billboardIndex);
-        }
+  public static EntityData billboardConstraints(byte billboardIndex) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.BYTE, billboardIndex) {
 
-        public BillboardConstraints(Display.Billboard billboard) {
-            this((byte) billboard.ordinal());
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 15;
+        }
+        return 14;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 15;
-            }
-            return 14;
-        }
-    }
+  public static EntityData brightnessOverride() {
+    return brightnessOverride(-1);
+  }
 
-    public static class BrightnessOverride extends AbstractEntityDataWrapper {
-        public BrightnessOverride(int lightValue) {
-            super(EntityDataTypes.INT, lightValue);
-        }
+  public static EntityData brightnessOverride(int blockLight, int skyLight) {
+    return brightnessOverride(blockLight << 4 | skyLight << 20);
+  }
 
-        public BrightnessOverride() {
-            this(-1);
-        }
+  public static EntityData brightnessOverride(int lightValue) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, lightValue) {
 
-        public BrightnessOverride(int blockLight, int skyLight) {
-            this(blockLight << 4 | skyLight << 20);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 16;
+        }
+        return 15;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 16;
-            }
-            return 15;
-        }
-    }
+  public static EntityData viewRange(float chunks) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.FLOAT, chunks) {
 
-    public static class ViewRange extends AbstractEntityDataWrapper {
-        public ViewRange(float chunks) {
-            super(EntityDataTypes.FLOAT, chunks);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 17;
+        }
+        return 16;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 17;
-            }
-            return 16;
-        }
-    }
+  public static EntityData shadowRadius(float size) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.FLOAT, size) {
 
-    public static class ShadowRadius extends AbstractEntityDataWrapper {
-        public ShadowRadius(float size) {
-            super(EntityDataTypes.FLOAT, size);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 18;
+        }
+        return 17;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 18;
-            }
-            return 17;
-        }
-    }
+  public static EntityData shadowStrength(float strength) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.FLOAT, strength) {
 
-    public static class ShadowStrength extends AbstractEntityDataWrapper {
-        public ShadowStrength(float strength) {
-            super(EntityDataTypes.FLOAT, strength);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 19;
+        }
+        return 18;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 19;
-            }
-            return 18;
-        }
-    }
+  public static EntityData width(float width) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.FLOAT, width) {
 
-    public static class Width extends AbstractEntityDataWrapper {
-        public Width(float width) {
-            super(EntityDataTypes.FLOAT, width);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 20;
+        }
+        return 19;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 20;
-            }
-            return 19;
-        }
-    }
+  public static EntityData height(float height) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.FLOAT, height) {
 
-    public static class Height extends AbstractEntityDataWrapper {
-        public Height(float width) {
-            super(EntityDataTypes.FLOAT, width);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 21;
+        }
+        return 20;
+      }
+    };
+  }
 
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 21;
-            }
-            return 20;
-        }
-    }
+  public static EntityData glowColorOverride() {
+    return glowColorOverride(-1);
+  }
 
-    public static class GlowColorOverride extends AbstractEntityDataWrapper {
-        public GlowColorOverride(Color color) {
-            this(color.getRGB());
-        }
+  public static EntityData glowColorOverride(Color color) {
+    return glowColorOverride(color.getRGB());
+  }
 
-        public GlowColorOverride(org.bukkit.Color color) {
-            this(color.asRGB());
-        }
+  public static EntityData glowColorOverride(org.bukkit.Color color) {
+    return glowColorOverride(color.asARGB());
+  }
 
-        public GlowColorOverride() {
-            this(-1);
-        }
+  public static EntityData glowColorOverride(int rgb) {
+    return new AbstractEntityDataWrapper(EntityDataTypes.INT, rgb) {
 
-        public GlowColorOverride(int rgb) {
-            super(EntityDataTypes.INT, rgb);
+      @Override
+      protected int versionedIndex() {
+        if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
+          return -1;
         }
-
-        @Override
-        protected int versionedIndex() {
-            if (this.serverVersion.isOlderThan(ServerVersion.V_1_19_4)) {
-                return -1;
-            }
-            if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
-                return 22;
-            }
-            return 21;
+        if (this.serverVersion.isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
+          return 22;
         }
-    }
+        return 21;
+      }
+    };
+  }
 }

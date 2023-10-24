@@ -153,16 +153,16 @@ public class ClientDisplay extends ClientEntity implements Display {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (interpolationDelay.hasChanged()) {
-      data.add(new DisplayDataWrapper.InterpolationDelay(interpolationDelay.getValue()));
+      data.add(DisplayDataWrapper.interpolationDelay(interpolationDelay.getValue()));
     }
     if (interpolationDuration.hasChanged()) {
-      data.add(new DisplayDataWrapper.InterpolationDuration(interpolationDuration.getValue()));
+      data.add(DisplayDataWrapper.interpolationDuration(interpolationDuration.getValue()));
     }
     if (transformation.hasChanged()) {
-      data.add(new DisplayDataWrapper.Translation(convert(transformation.getValue().getTranslation())));
-      data.add(new DisplayDataWrapper.Scale(convert(transformation.getValue().getScale())));
-      data.add(new DisplayDataWrapper.LeftRotation(convert(transformation.getValue().getLeftRotation())));
-      data.add(new DisplayDataWrapper.RightRotation(convert(transformation.getValue().getRightRotation())));
+      data.add(DisplayDataWrapper.translation(convert(transformation.getValue().getTranslation())));
+      data.add(DisplayDataWrapper.scale(convert(transformation.getValue().getScale())));
+      data.add(DisplayDataWrapper.leftRotation(convert(transformation.getValue().getLeftRotation())));
+      data.add(DisplayDataWrapper.rightRotation(convert(transformation.getValue().getRightRotation())));
       transformation.flushChanged();
     }
     if (billboard.hasChanged()) {
@@ -170,31 +170,31 @@ public class ClientDisplay extends ClientEntity implements Display {
     }
     if (brightness.hasChanged()) {
       if (brightness.getValue() == null) {
-        data.add(new DisplayDataWrapper.BrightnessOverride());
+        data.add(DisplayDataWrapper.brightnessOverride());
       } else {
-        data.add(new DisplayDataWrapper.BrightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
+        data.add(DisplayDataWrapper.brightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
       }
     }
     if (viewRange.hasChanged()) {
-      data.add(new DisplayDataWrapper.ViewRange(viewRange.getValue()));
+      data.add(DisplayDataWrapper.viewRange(viewRange.getValue()));
     }
     if (shadowRadius.hasChanged()) {
-      data.add(new DisplayDataWrapper.ShadowRadius(shadowRadius.getValue()));
+      data.add(DisplayDataWrapper.shadowRadius(shadowRadius.getValue()));
     }
     if (shadowStrength.hasChanged()) {
-      data.add(new DisplayDataWrapper.ShadowStrength(shadowStrength.getValue()));
+      data.add(DisplayDataWrapper.shadowStrength(shadowStrength.getValue()));
     }
     if (displayWidth.hasChanged()) {
-      data.add(new DisplayDataWrapper.Width(displayWidth.getValue()));
+      data.add(DisplayDataWrapper.width(displayWidth.getValue()));
     }
     if (displayHeight.hasChanged()) {
-      data.add(new DisplayDataWrapper.Height(displayHeight.getValue()));
+      data.add(DisplayDataWrapper.height(displayHeight.getValue()));
     }
     if (glowColorOverride.hasChanged()) {
       if (glowColorOverride.getValue() == null) {
-        data.add(new DisplayDataWrapper.GlowColorOverride());
+        data.add(DisplayDataWrapper.glowColorOverride());
       } else {
-        data.add(new DisplayDataWrapper.GlowColorOverride(glowColorOverride.getValue()));
+        data.add(DisplayDataWrapper.glowColorOverride(glowColorOverride.getValue()));
       }
     }
     return data;
