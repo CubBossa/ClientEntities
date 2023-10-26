@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
 import de.cubbossa.cliententities.*;
+import de.cubbossa.cliententities.entitydata.ArmorStandDataWrapper;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
@@ -205,34 +206,32 @@ public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
     setMeta(this.invisible, !visible);
   }
 
+  private Vector3f convert(EulerAngle eulerAngle) {
+    return new Vector3f((float) eulerAngle.getX(), (float) eulerAngle.getY(), (float) eulerAngle.getZ());
+  }
+
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (armorStandMask.hasChanged()) {
-      data.add(new EntityData(15, EntityDataTypes.BYTE, armorStandMask.byteVal()));
+      data.add(ArmorStandDataWrapper.options(armorStandMask.byteVal()).build());
     }
     if (headPose.hasChanged()) {
-      data.add(new EntityData(16, EntityDataTypes.ROTATION,
-          new Vector3f((float) headPose.getValue().getX(), (float) headPose.getValue().getY(), (float) headPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.headPose(convert(headPose.getValue())));
     }
     if (bodyPose.hasChanged()) {
-      data.add(new EntityData(17, EntityDataTypes.ROTATION,
-          new Vector3f((float) bodyPose.getValue().getX(), (float) bodyPose.getValue().getY(), (float) bodyPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.bodyPose(convert(bodyPose.getValue())));
     }
     if (leftArmPose.hasChanged()) {
-      data.add(new EntityData(18, EntityDataTypes.ROTATION,
-          new Vector3f((float) leftArmPose.getValue().getX(), (float) leftArmPose.getValue().getY(), (float) leftArmPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.leftArmPose(convert(leftArmPose.getValue())));
     }
     if (rightArmPose.hasChanged()) {
-      data.add(new EntityData(19, EntityDataTypes.ROTATION,
-          new Vector3f((float) rightArmPose.getValue().getX(), (float) rightArmPose.getValue().getY(), (float) rightArmPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.rightArmPose(convert(rightArmPose.getValue())));
     }
     if (leftLegPose.hasChanged()) {
-      data.add(new EntityData(20, EntityDataTypes.ROTATION,
-          new Vector3f((float) leftLegPose.getValue().getX(), (float) leftLegPose.getValue().getY(), (float) leftLegPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.leftLegPose(convert(leftLegPose.getValue())));
     }
     if (rightLegPose.hasChanged()) {
-      data.add(new EntityData(21, EntityDataTypes.ROTATION,
-          new Vector3f((float) rightLegPose.getValue().getX(), (float) rightLegPose.getValue().getY(), (float) rightLegPose.getValue().getZ())));
+      data.add(ArmorStandDataWrapper.rightLegPose(convert(rightLegPose.getValue())));
     }
     return data;
   }
