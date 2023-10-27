@@ -58,7 +58,7 @@ public class TestPlugin extends JavaPlugin implements Listener {
                 .peek(o -> o.setBlock(Material.AMETHYST_BLOCK.createBlockData()))
                 .forEach(o -> {
                   Transformation t = o.getTransformation();
-                  t.getScale().mul(0.05f);
+                  t.getScale().mul(0.5f);
                   o.setTransformation(t);
                 });
             playerSpace.announce();

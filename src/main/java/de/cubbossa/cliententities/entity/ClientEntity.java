@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.concurrent.NotThreadSafe;
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -188,13 +190,18 @@ public class ClientEntity implements ClientViewElement, Entity {
 
     // Change Meta Data
     if (metaChanged) {
+      entityLock.lock();
       try {
-        List<EntityData> data = metaData();
-        result.add(PacketInfo.packet(new WrapperPlayServerEntityMetadata(entityId, data)));
+        if (metaChanged) {
+          List<EntityData> data = metaData();
+          result.add(PacketInfo.packet(new WrapperPlayServerEntityMetadata(entityId, data)));
+          metaChanged = false;
+        }
       } catch (Throwable t) {
         t.printStackTrace();
+      } finally {
+        entityLock.unlock();
       }
-      metaChanged = false;
     }
 
     // Update Passengers
@@ -223,32 +230,46 @@ public class ClientEntity implements ClientViewElement, Entity {
     }
     if (airTicks.hasChanged()) {
       data.add(new EntityDataWrapper.RemainingAir(airTicks.getValue()));
+      airTicks.flushChanged();
     }
     if (customName.hasChanged()) {
       data.add(new EntityDataWrapper.CustomName(customName.getValue()));
+      customName.flushChanged();
     }
     if (customNameVisible.hasChanged()) {
       data.add(new EntityDataWrapper.CustomNameVisible(customNameVisible.getBooleanValue()));
+      customNameVisible.flushChanged();
     }
     if (silent.hasChanged()) {
       data.add(new EntityDataWrapper.Silent(silent.getBooleanValue()));
+      silent.flushChanged();
     }
     if (gravity.hasChanged()) {
       data.add(new EntityDataWrapper.NoGravity(!gravity.getBooleanValue()));
+      gravity.flushChanged();
     }
     if (pose.hasChanged()) {
       data.add(new EntityDataWrapper.Pose(EntityPose.values()[pose.getValue().ordinal()]));
+      pose.flushChanged();
     }
     if (frozen.hasChanged()) {
       data.add(new EntityDataWrapper.FrozenTicks(frozen.getBooleanValue() ? 1000 : 0));
+      frozen.flushChanged();
     }
     return data;
   }
 
+  Lock entityLock = new ReentrantLock();
+
   protected <T> void setMeta(TrackedField<T> field, T val) {
-    field.setValue(val);
-    if (field.hasChanged()) {
-      metaChanged = true;
+    entityLock.lock();
+    try {
+      field.setValue(val);
+      if (field.hasChanged()) {
+        metaChanged = true;
+      }
+    } finally {
+      entityLock.unlock();
     }
   }
 
@@ -533,6 +554,7 @@ public class ClientEntity implements ClientViewElement, Entity {
     public int id() {
       return id;
     }
+
   }
 
   void playAnimation(Animation animation) {

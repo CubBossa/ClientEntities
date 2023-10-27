@@ -20,6 +20,8 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,7 @@ public class PlayerSpaceImpl implements PlayerSpace {
   Collection<UUID> players;
   Map<Integer, ClientEntity> entities;
   Map<Class<? extends Event>, Map<UUID, Consumer<Event>>> listeners;
+  Lock announcementLock = new ReentrantLock();
 
   PlayerSpaceImpl(Collection<UUID> players, boolean defaultListener) {
     this.players = ConcurrentHashMap.newKeySet();
@@ -206,12 +209,14 @@ public class PlayerSpaceImpl implements PlayerSpace {
 
   @Override
   public void announce() {
+    announcementLock.lock();
     Collection<Player> players = getPlayers();
     entities.values().stream()
         .map(entity -> (ClientViewElement) entity)
         .peek(entity -> handleUpdateInfoList(entity.spawn(true), players))
         .peek(entity -> handleUpdateInfoList(entity.state(true), players))
         .forEach(entity -> handleUpdateInfoList(entity.delete(true), players));
+    announcementLock.unlock();
   }
 
   private void handleUpdateInfoList(List<ClientViewElement.UpdateInfo> list, Collection<Player> players) {

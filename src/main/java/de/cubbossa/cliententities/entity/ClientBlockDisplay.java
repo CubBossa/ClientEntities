@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
 
-  TrackedField<BlockData> block = new TrackedField<>(Material.LIME_CONCRETE.createBlockData());
+  TrackedField<BlockData> block = new TrackedField<>(Material.MAGENTA_CONCRETE.createBlockData());
 
   public ClientBlockDisplay(PlayerSpaceImpl playerSpace, int entityId) {
     super(playerSpace, entityId, EntityType.BLOCK_DISPLAY);
@@ -34,7 +34,10 @@ public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
   @Override
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
-    data.add(new BlockDisplayDataWrapper.Block(SpigotConversionUtil.fromBukkitBlockData(block.getValue())));
+    if (block.hasChanged()) {
+      data.add(new BlockDisplayDataWrapper.Block(SpigotConversionUtil.fromBukkitBlockData(block.getValue())));
+      block.flushChanged();
+    }
     return data;
   }
 }
