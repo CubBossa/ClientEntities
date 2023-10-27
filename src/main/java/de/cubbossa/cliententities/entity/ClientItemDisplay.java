@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
+import de.cubbossa.cliententities.entitydata.ItemDisplayDataWrapper;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -28,10 +29,10 @@ public class ClientItemDisplay extends ClientDisplay implements ItemDisplay {
     List<EntityData> metaData() {
         List<EntityData> data = super.metaData();
         if (itemStack.hasChanged()) {
-            data.add(new EntityData(22, EntityDataTypes.ITEMSTACK, SpigotConversionUtil.fromBukkitItemStack(itemStack.getValue())));
+            data.add(ItemDisplayDataWrapper.item(SpigotConversionUtil.fromBukkitItemStack(itemStack.getValue())));
         }
         if (itemDisplayTransform.hasChanged()) {
-            data.add(new EntityData(23, EntityDataTypes.BYTE, (byte) itemDisplayTransform.getValue().ordinal()));
+            data.add(ItemDisplayDataWrapper.displayType((byte) itemDisplayTransform.getValue().ordinal()));
         }
         return data;
     }

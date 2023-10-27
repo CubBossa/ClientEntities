@@ -172,27 +172,27 @@ public class ClientDisplay extends ClientEntity implements Display {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (interpolationDelay.hasChanged()) {
-      data.add(new DisplayDataWrapper.InterpolationDelay(interpolationDelay.getValue()));
+      data.add(DisplayDataWrapper.interpolationDelay(interpolationDelay.getValue()));
       interpolationDelay.flushChanged();
     }
     if (interpolationDuration.hasChanged()) {
-      data.add(new DisplayDataWrapper.InterpolationDuration(interpolationDuration.getValue()));
+      data.add(DisplayDataWrapper.interpolationDuration(interpolationDuration.getValue()));
       interpolationDuration.flushChanged();
     }
     if(translation.hasChanged()) {
-      data.add(new DisplayDataWrapper.Translation(convert(translation.getValue())));
+      data.add(DisplayDataWrapper.translation(convert(transformation.getValue().getTranslation())));
       translation.flushChanged();
     }
     if(leftRotation.hasChanged()) {
-      data.add(new DisplayDataWrapper.LeftRotation(convert(leftRotation.getValue())));
+      data.add(DisplayDataWrapper.leftRotation(convert(transformation.getValue().getLeftRotation())));
       leftRotation.flushChanged();
     }
     if(scale.hasChanged()) {
-      data.add(new DisplayDataWrapper.Scale(convert(scale.getValue())));
+      data.add(DisplayDataWrapper.scale(convert(transformation.getValue().getScale())));
       scale.flushChanged();
     }
     if(rightRotation.hasChanged()) {
-      data.add(new DisplayDataWrapper.RightRotation(convert(rightRotation.getValue())));
+      data.add(DisplayDataWrapper.rightRotation(convert(transformation.getValue().getRightRotation())));
       rightRotation.flushChanged();
     }
     if (billboard.hasChanged()) {
@@ -201,37 +201,37 @@ public class ClientDisplay extends ClientEntity implements Display {
     }
     if (brightness.hasChanged()) {
       if (brightness.getValue() == null) {
-        data.add(new DisplayDataWrapper.BrightnessOverride());
+        data.add(DisplayDataWrapper.brightnessOverride());
       } else {
-        data.add(new DisplayDataWrapper.BrightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
+        data.add(DisplayDataWrapper.brightnessOverride(brightness.getValue().getBlockLight(), brightness.getValue().getSkyLight()));
       }
       brightness.flushChanged();
     }
     if (viewRange.hasChanged()) {
-      data.add(new DisplayDataWrapper.ViewRange(viewRange.getValue()));
+      data.add(DisplayDataWrapper.viewRange(viewRange.getValue()));
       viewRange.flushChanged();
     }
     if (shadowRadius.hasChanged()) {
-      data.add(new DisplayDataWrapper.ShadowRadius(shadowRadius.getValue()));
+      data.add(DisplayDataWrapper.shadowRadius(shadowRadius.getValue()));
       shadowRadius.flushChanged();
     }
     if (shadowStrength.hasChanged()) {
-      data.add(new DisplayDataWrapper.ShadowStrength(shadowStrength.getValue()));
+      data.add(DisplayDataWrapper.shadowStrength(shadowStrength.getValue()));
       shadowRadius.flushChanged();
     }
     if (displayWidth.hasChanged()) {
-      data.add(new DisplayDataWrapper.Width(displayWidth.getValue()));
+      data.add(DisplayDataWrapper.width(displayWidth.getValue()));
       displayWidth.flushChanged();
     }
     if (displayHeight.hasChanged()) {
-      data.add(new DisplayDataWrapper.Height(displayHeight.getValue()));
+      data.add(DisplayDataWrapper.height(displayHeight.getValue()));
       displayHeight.flushChanged();
     }
     if (glowColorOverride.hasChanged()) {
       if (glowColorOverride.getValue() == null) {
-        data.add(new DisplayDataWrapper.GlowColorOverride());
+        data.add(DisplayDataWrapper.glowColorOverride());
       } else {
-        data.add(new DisplayDataWrapper.GlowColorOverride(glowColorOverride.getValue()));
+        data.add(DisplayDataWrapper.glowColorOverride(glowColorOverride.getValue()));
       }
       glowColorOverride.flushChanged();
     }

@@ -6,6 +6,7 @@ import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
+import de.cubbossa.cliententities.entitydata.InteractionDataWrapper;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Interaction;
 import org.jetbrains.annotations.Nullable;
@@ -66,13 +67,13 @@ public class ClientInteraction extends ClientEntity implements Interaction {
   List<EntityData> metaData() {
     List<EntityData> data = super.metaData();
     if (interactionWidth.hasChanged()) {
-      data.add(new EntityData(8, EntityDataTypes.FLOAT, interactionWidth.getValue()));
+      data.add(InteractionDataWrapper.width(interactionWidth.getValue()));
     }
     if (interactionHeight.hasChanged()) {
-      data.add(new EntityData(9, EntityDataTypes.FLOAT, interactionHeight.getValue()));
+      data.add(InteractionDataWrapper.height(interactionHeight.getValue()));
     }
     if (responsive.hasChanged()) {
-      data.add(new EntityData(10, EntityDataTypes.BOOLEAN, responsive.getBooleanValue()));
+      data.add(InteractionDataWrapper.responsive(responsive.getBooleanValue()));
     }
     return data;
   }

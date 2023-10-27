@@ -229,31 +229,31 @@ public class ClientEntity implements ClientViewElement, Entity {
       data.add(new EntityData(0, EntityDataTypes.BYTE, metaMask.byteVal()));
     }
     if (airTicks.hasChanged()) {
-      data.add(new EntityDataWrapper.RemainingAir(airTicks.getValue()));
+      data.add(EntityDataWrapper.remainingAir(airTicks.getValue()));
       airTicks.flushChanged();
     }
     if (customName.hasChanged()) {
-      data.add(new EntityDataWrapper.CustomName(customName.getValue()));
+      data.add(EntityDataWrapper.customName(customName.getValue()));
       customName.flushChanged();
     }
     if (customNameVisible.hasChanged()) {
-      data.add(new EntityDataWrapper.CustomNameVisible(customNameVisible.getBooleanValue()));
+      data.add(EntityDataWrapper.customNameVisible(customNameVisible.getBooleanValue()));
       customNameVisible.flushChanged();
     }
     if (silent.hasChanged()) {
-      data.add(new EntityDataWrapper.Silent(silent.getBooleanValue()));
+      data.add(EntityDataWrapper.silent(silent.getBooleanValue()));
       silent.flushChanged();
     }
     if (gravity.hasChanged()) {
-      data.add(new EntityDataWrapper.NoGravity(!gravity.getBooleanValue()));
+      data.add(EntityDataWrapper.noGravity(!gravity.getBooleanValue()));
       gravity.flushChanged();
     }
     if (pose.hasChanged()) {
-      data.add(new EntityDataWrapper.Pose(EntityPose.values()[pose.getValue().ordinal()]));
+      data.add(EntityDataWrapper.pose(EntityPose.values()[pose.getValue().ordinal()]));
       pose.flushChanged();
     }
     if (frozen.hasChanged()) {
-      data.add(new EntityDataWrapper.FrozenTicks(frozen.getBooleanValue() ? 1000 : 0));
+      data.add(EntityDataWrapper.frozenTicks(frozen.getBooleanValue() ? 1000 : 0));
       frozen.flushChanged();
     }
     return data;
