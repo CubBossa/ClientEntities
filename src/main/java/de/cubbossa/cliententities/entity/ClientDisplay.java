@@ -180,19 +180,19 @@ public class ClientDisplay extends ClientEntity implements Display {
       interpolationDuration.flushChanged();
     }
     if(translation.hasChanged()) {
-      data.add(DisplayDataWrapper.translation(convert(transformation.getValue().getTranslation())));
+      data.add(DisplayDataWrapper.translation(convert(translation.getValue())));
       translation.flushChanged();
     }
     if(leftRotation.hasChanged()) {
-      data.add(DisplayDataWrapper.leftRotation(convert(transformation.getValue().getLeftRotation())));
+      data.add(DisplayDataWrapper.leftRotation(convert(leftRotation.getValue())));
       leftRotation.flushChanged();
     }
     if(scale.hasChanged()) {
-      data.add(DisplayDataWrapper.scale(convert(transformation.getValue().getScale())));
+      data.add(DisplayDataWrapper.scale(convert(scale.getValue())));
       scale.flushChanged();
     }
     if(rightRotation.hasChanged()) {
-      data.add(DisplayDataWrapper.rightRotation(convert(transformation.getValue().getRightRotation())));
+      data.add(DisplayDataWrapper.rightRotation(convert(rightRotation.getValue())));
       rightRotation.flushChanged();
     }
     if (billboard.hasChanged()) {
