@@ -12,8 +12,8 @@ public class TextDisplayDataWrapper extends DisplayDataWrapper {
   protected TextDisplayDataWrapper() {
   }
 
-  public static EntityData text(Component component) {
-    return text(SERIALIZER.serialize(component));
+  public static EntityData text(Component text) {
+    return text(SERIALIZER.serialize(text));
   }
 
   public static EntityData text(String component) {

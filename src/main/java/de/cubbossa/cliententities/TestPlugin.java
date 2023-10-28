@@ -14,6 +14,8 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -48,6 +50,17 @@ public class TestPlugin extends JavaPlugin implements Listener {
           case ENDER_SIGNAL -> {
             ClientEyeOfEnder enderSignal = playerSpace.spawn(player.getLocation(), EnderSignal.class);
             enderSignal.setVelocity(new Vector(0.5, 0.5, 0.5).multiply(1_000));
+            playerSpace.announce();
+          }
+          case TEXT_DISPLAY -> {
+            Location eye = player.getEyeLocation().clone();
+            Location target = eye.add(eye.getDirection().clone().normalize());
+            eye.setDirection(eye.getDirection().multiply(new Vector(-1, 0, -1)));
+            TextDisplay textDisplay = playerSpace.spawn(eye, TextDisplay.class);
+            textDisplay.setText("ABCDEFG\ntest");
+            textDisplay.setBillboard(Display.Billboard.VERTICAL);
+            textDisplay.setBackgroundColor(Color.RED);
+            // textDisplay.setAlignment(TextDisplay.TextAlignment.LEFT);
             playerSpace.announce();
           }
           case BLOCK_DISPLAY -> {

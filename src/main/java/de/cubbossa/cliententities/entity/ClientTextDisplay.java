@@ -108,15 +108,19 @@ public class ClientTextDisplay extends ClientDisplay implements TextDisplay {
     List<EntityData> data = super.metaData();
     if (text.hasChanged()) {
       data.add(TextDisplayDataWrapper.text(text.getValue()));
+      text.flushChanged();
     }
     if (lineWidth.hasChanged()) {
       data.add(TextDisplayDataWrapper.textWidth(lineWidth.getValue()));
+      lineWidth.flushChanged();
     }
     if (backgroundColor.hasChanged()) {
       data.add(TextDisplayDataWrapper.backgroundColor(backgroundColor.getValue() == null ? 0x40000000 : backgroundColor.getValue().asARGB()));
+      backgroundColor.flushChanged();
     }
     if (textOpacity.hasChanged()) {
       data.add(TextDisplayDataWrapper.textOpacity(textOpacity.getValue()));
+      textOpacity.flushChanged();
     }
     if (shadowed.hasChanged() || seeThrough.hasChanged() || defaultBackground.hasChanged() || alignment.hasChanged()) {
       data.add(TextDisplayDataWrapper.options(
@@ -125,6 +129,10 @@ public class ClientTextDisplay extends ClientDisplay implements TextDisplay {
           defaultBackground.getBooleanValue(),
           TextDisplayDataWrapper.TextAlignment.values()[alignment.getValue().ordinal()]
       ));
+      shadowed.flushChanged();
+      seeThrough.flushChanged();
+      defaultBackground.flushChanged();
+      alignment.flushChanged();
     }
     return data;
   }

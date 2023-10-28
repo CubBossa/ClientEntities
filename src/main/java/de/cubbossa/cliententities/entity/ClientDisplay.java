@@ -21,10 +21,10 @@ public class ClientDisplay extends ClientEntity implements Display {
 
   TrackedField<Integer> interpolationDelay = new TrackedField<>(0);
   TrackedField<Integer> interpolationDuration = new TrackedField<>(0);
-  TrackedField<Quaternionf> leftRotation = new TrackedField<>(new Quaternionf(new AxisAngle4f(0, 1, 0, 0)));
+  TrackedField<Quaternionf> leftRotation = new TrackedField<>(new Quaternionf());
   TrackedField<Vector3f> translation = new TrackedField<>(new Vector3f(0, 0, 0));
   TrackedField<Vector3f> scale = new TrackedField<>(new Vector3f(1, 1, 1));
-  TrackedField<Quaternionf> rightRotation = new TrackedField<>(new Quaternionf(new AxisAngle4f(0, 1, 0, 0)));
+  TrackedField<Quaternionf> rightRotation = new TrackedField<>(new Quaternionf());
   TrackedField<Display.Billboard> billboard = new TrackedField<>(Display.Billboard.FIXED);
   TrackedField<Display.@Nullable Brightness> brightness = new TrackedField<>();
   TrackedField<Float> viewRange = new TrackedField<>(1f);
@@ -196,7 +196,7 @@ public class ClientDisplay extends ClientEntity implements Display {
       rightRotation.flushChanged();
     }
     if (billboard.hasChanged()) {
-      data.add(new EntityData(14, EntityDataTypes.BYTE, (byte) billboard.getValue().ordinal()));
+      data.add(DisplayDataWrapper.billboardConstraints(billboard.getValue()));
       billboard.flushChanged();
     }
     if (brightness.hasChanged()) {

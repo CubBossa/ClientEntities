@@ -69,7 +69,9 @@ public class PlayerSpaceImpl implements PlayerSpace {
 
   @Override
   public void close() throws IOException {
-    PacketEvents.getAPI().getEventManager().unregisterListener(clientEntityListener);
+    if (clientEntityListener != null) {
+      PacketEvents.getAPI().getEventManager().unregisterListener(clientEntityListener);
+    }
   }
 
   @Override
