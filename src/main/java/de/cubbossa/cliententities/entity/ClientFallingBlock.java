@@ -1,5 +1,7 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
@@ -7,7 +9,6 @@ import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,7 +17,7 @@ public class ClientFallingBlock extends ClientEntity implements FallingBlock {
   TrackedField<BlockData> blockData = new TrackedField<>(Material.SAND.createBlockData());
 
   public ClientFallingBlock(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.FALLING_BLOCK);
+    super(playerSpace, entityId, EntityTypes.FALLING_BLOCK);
   }
 
   @Override

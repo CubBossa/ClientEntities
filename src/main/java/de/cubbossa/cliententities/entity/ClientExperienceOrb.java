@@ -1,6 +1,7 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnExperienceOrb;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
@@ -19,7 +20,7 @@ public class ClientExperienceOrb extends ClientEntity implements ExperienceOrb {
   final int count;
 
   public ClientExperienceOrb(PlayerSpaceImpl playerSpace, int entityId, Location location, int count) {
-    super(playerSpace, entityId, EntityType.EXPERIENCE_ORB);
+    super(playerSpace, entityId, EntityTypes.EXPERIENCE_ORB);
     this.location = location;
     this.count = count;
   }

@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
@@ -24,7 +25,7 @@ public class ClientVillager extends ClientAbstractVillager implements Villager {
     TrackedField<Integer> villagerLevel = new TrackedField<>(0);
 
     public ClientVillager(PlayerSpaceImpl playerSpace, int entityId) {
-        super(playerSpace, entityId, EntityType.VILLAGER);
+        super(playerSpace, entityId, EntityTypes.VILLAGER);
     }
 
     @Override

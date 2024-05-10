@@ -3,6 +3,9 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
@@ -119,7 +122,7 @@ public class ClientEntity implements ClientViewElement, Entity {
   }
 
   List<PacketWrapper<?>> spawnPacket() {
-    return Collections.singletonList(new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), SpigotConversionUtil.fromBukkitEntityType(type),
+    return Collections.singletonList(new WrapperPlayServerSpawnEntity(entityId, Optional.ofNullable(uniqueId), type,
         new Vector3d(location.getX(), location.getY(), location.getZ()), 0, 0, 0, data(),
         Optional.ofNullable(velocity == null ? null : new Vector3d(velocity.getValue().getX(), velocity.getValue().getY(), velocity.getValue().getZ()))
     ));
@@ -757,8 +760,8 @@ public class ClientEntity implements ClientViewElement, Entity {
 
   @NotNull
   @Override
-  public EntityType getType() {
-    return type;
+  public org.bukkit.entity.EntityType getType() {
+    return SpigotConversionUtil.toBukkitEntityType(type);
   }
 
   @NotNull

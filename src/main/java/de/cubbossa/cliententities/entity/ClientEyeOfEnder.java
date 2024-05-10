@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
@@ -22,7 +23,7 @@ public class ClientEyeOfEnder extends ClientEntity implements EnderSignal {
     TrackedField<@Nullable ItemStack> item = new TrackedField<>();
 
     public ClientEyeOfEnder(PlayerSpaceImpl playerSpace, int entityId) {
-        super(playerSpace, entityId, EntityType.EYE_OF_ENDER);
+        super(playerSpace, entityId, EntityTypes.EYE_OF_ENDER);
     }
 
     @Override

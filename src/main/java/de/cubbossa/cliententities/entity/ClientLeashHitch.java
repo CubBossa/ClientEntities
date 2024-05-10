@@ -1,5 +1,6 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.EntityType;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClientLeashHitch extends ClientEntity implements LeashHitch {
 
   public ClientLeashHitch(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.LEASH_KNOT);
+    super(playerSpace, entityId, EntityTypes.LEASH_KNOT);
   }
 
   @Override

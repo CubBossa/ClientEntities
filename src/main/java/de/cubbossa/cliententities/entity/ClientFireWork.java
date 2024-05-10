@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
@@ -30,7 +31,7 @@ public class ClientFireWork extends ClientEntity implements Firework {
   boolean detonated = false;
 
   public ClientFireWork(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.FIREWORK_ROCKET);
+    super(playerSpace, entityId, EntityTypes.FIREWORK_ROCKET);
   }
 
   @Override

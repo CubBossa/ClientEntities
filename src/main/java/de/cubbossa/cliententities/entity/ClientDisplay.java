@@ -2,13 +2,13 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
 import de.cubbossa.cliententities.entitydata.DisplayDataWrapper;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
-import org.bukkit.entity.EntityType;
 import org.bukkit.util.Transformation;
 import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;

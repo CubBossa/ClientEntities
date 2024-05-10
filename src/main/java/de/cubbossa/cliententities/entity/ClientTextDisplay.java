@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
@@ -27,7 +28,7 @@ public class ClientTextDisplay extends ClientDisplay implements TextDisplay {
   TrackedField<TextDisplay.TextAlignment> alignment = new TrackedField<>(TextDisplay.TextAlignment.CENTER);
 
   public ClientTextDisplay(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.TEXT_DISPLAY);
+    super(playerSpace, entityId, EntityTypes.TEXT_DISPLAY);
   }
 
   public String getText() {

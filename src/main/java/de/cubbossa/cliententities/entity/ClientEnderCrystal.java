@@ -2,13 +2,13 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class ClientEnderCrystal extends ClientEntity implements EnderCrystal {
   TrackedField<@Nullable Location> beamTarget = new TrackedField<>();
 
   public ClientEnderCrystal(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.END_CRYSTAL);
+    super(playerSpace, entityId, EntityTypes.END_CRYSTAL);
   }
 
   @Override

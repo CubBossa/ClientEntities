@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
@@ -20,7 +21,7 @@ public class ClientInteraction extends ClientEntity implements Interaction {
   TrackedBoolField responsive = new TrackedBoolField(false);
 
   public ClientInteraction(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.INTERACTION);
+    super(playerSpace, entityId, EntityTypes.INTERACTION);
     responsive.setValue(true);
   }
 

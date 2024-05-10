@@ -1,6 +1,7 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
 import de.cubbossa.cliententities.entitydata.BlockDisplayDataWrapper;
@@ -18,7 +19,7 @@ public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
   TrackedField<BlockData> block = new TrackedField<>(Material.MAGENTA_CONCRETE.createBlockData());
 
   public ClientBlockDisplay(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.BLOCK_DISPLAY);
+    super(playerSpace, entityId, EntityTypes.BLOCK_DISPLAY);
   }
 
   @NotNull

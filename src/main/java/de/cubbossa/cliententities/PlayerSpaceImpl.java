@@ -6,10 +6,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDe
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import de.cubbossa.cliententities.entity.*;
-import de.cubbossa.dontshade.cliententities.EntityIdGenerator;
-import de.cubbossa.dontshade.cliententities.EntityIdProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
 import org.bukkit.event.Event;
@@ -52,7 +51,7 @@ public class PlayerSpaceImpl implements PlayerSpace {
   @Nullable ClientEntityListener clientEntityListener;
   Collection<UUID> players;
   Map<Integer, ClientEntity> entities;
-  Map<Class<? extends Event>, Map<UUID, Consumer<Event>>> listeners;
+  Map<Class<? extends Event>, Set<Listener<? extends Event>>> listeners;
   Lock announcementLock = new ReentrantLock();
 
   PlayerSpaceImpl(Collection<UUID> players, boolean defaultListener) {
@@ -117,13 +116,10 @@ public class PlayerSpaceImpl implements PlayerSpace {
   }
 
   /**
-   * Removes the entity from the map and frees the id.
-   * The id can then be used for a new entity later.
+   * Removes the entity from the map.
    */
   void releaseEntity(int id) {
-    if (entities.remove(id) != null) {
-      entityIdGenerator.releaseEntityId(id);
-    }
+    entities.remove(id);
   }
 
   @Override
@@ -189,22 +185,32 @@ public class PlayerSpaceImpl implements PlayerSpace {
   }
 
   @Override
-  public <EventT extends Event> ListenerHandle registerListener(Class<EventT> event, Consumer<EventT> handler) {
-    ListenerHandle handle = new ListenerHandle(event, UUID.randomUUID());
-    listeners.computeIfAbsent(event, c -> new HashMap<>()).put(handle.id(), (Consumer<Event>) handler);
-    return handle;
+  public <EventT extends Event> Listener<EventT> registerListener(Class<EventT> event, Consumer<EventT> handler) {
+    Listener<EventT> listener = new Listener<>() {
+      @Override
+      public Class<EventT> getType() {
+        return event;
+      }
+
+      @Override
+      public void accept(EventT eventT) {
+        handler.accept(eventT);
+      }
+    };
+    listeners.computeIfAbsent(event, c -> new HashSet<>()).add(listener);
+    return listener;
   }
 
   @Override
-  public void unregisterListener(ListenerHandle handle) {
-    listeners.computeIfAbsent(handle.type(), c -> new HashMap<>()).remove(handle.id());
+  public <EventT extends Event> void unregisterListener(Listener<EventT> handle) {
+    listeners.computeIfAbsent(handle.getType(), c -> new HashSet<>()).remove(handle);
   }
 
   @Override
   public <EventT extends Event> void callEvent(EventT event) {
     listeners.forEach((key, value) -> {
       if (key.isInstance(event)) {
-        value.values().forEach(eventConsumer -> eventConsumer.accept(event));
+        value.forEach(eventConsumer -> ((Listener<EventT>) eventConsumer).accept(event));
       }
     });
   }

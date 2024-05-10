@@ -1,5 +1,6 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;

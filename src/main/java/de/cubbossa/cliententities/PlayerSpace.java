@@ -52,9 +52,9 @@ public interface PlayerSpace extends Closeable {
 
   // Events
 
-  <EventT extends Event> ListenerHandle registerListener(Class<EventT> event, Consumer<EventT> handler);
+  <EventT extends Event> Listener<EventT> registerListener(Class<EventT> event, Consumer<EventT> handler);
 
-  void unregisterListener(ListenerHandle handle);
+  <EventT extends Event> void unregisterListener(Listener<EventT> handle);
 
   <EventT extends Event> void callEvent(EventT event);
 
@@ -74,8 +74,6 @@ public interface PlayerSpace extends Closeable {
    * If certain more updates are needed, more PlayerSpaces or more announce() calls are necessary.
    */
   void announce();
-
-
 
   class Builder {
     long period = -1;
@@ -141,7 +139,10 @@ public interface PlayerSpace extends Closeable {
     }
   }
 
-  public record ListenerHandle(Class<? extends Event> type, UUID id) {
+  interface Listener<E extends Event> {
 
+    Class<E> getType();
+
+    void accept(E event);
   }
 }

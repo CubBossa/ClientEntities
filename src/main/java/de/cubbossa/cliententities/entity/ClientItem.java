@@ -2,6 +2,8 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCollectItem;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
@@ -9,7 +11,6 @@ import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +24,7 @@ public class ClientItem extends ClientEntity implements Item {
   TrackedField<ItemStack> itemStack = new TrackedField<>(new ItemStack(Material.AIR));
 
   public ClientItem(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.ITEM);
+    super(playerSpace, entityId, EntityTypes.ITEM);
   }
 
   @NotNull

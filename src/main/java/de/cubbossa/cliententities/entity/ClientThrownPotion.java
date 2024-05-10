@@ -1,5 +1,6 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import org.bukkit.Bukkit;
@@ -17,7 +18,7 @@ import java.util.Collection;
 public class ClientThrownPotion extends ClientThrownItemProjectile implements ThrownPotion {
 
     public ClientThrownPotion(PlayerSpaceImpl playerSpace, int entityId, PotionType potionEffect) {
-        super(playerSpace, entityId, EntityType.POTION, null);
+        super(playerSpace, entityId, EntityTypes.POTION, null);
 
         ItemStack stack = new ItemStack(Material.SPLASH_POTION);
         PotionMeta meta = (PotionMeta) stack.getItemMeta();

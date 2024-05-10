@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
@@ -49,7 +50,7 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
   TrackedField<@Nullable Entity> rightShoulderEntity = new TrackedField<>();
 
   public ClientPlayer(PlayerSpaceImpl playerSpace, String name) {
-    super(playerSpace, -1, EntityType.PLAYER);
+    super(playerSpace, -1, EntityTypes.PLAYER);
     this.name.setValue(name);
     this.displayName.setValue(Component.text(name));
   }

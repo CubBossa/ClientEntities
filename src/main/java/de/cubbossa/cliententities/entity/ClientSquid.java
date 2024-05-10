@@ -1,5 +1,6 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClientSquid extends ClientMob implements Squid {
 
   public ClientSquid(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.SQUID);
+    super(playerSpace, entityId, EntityTypes.SQUID);
   }
 
   @NotNull

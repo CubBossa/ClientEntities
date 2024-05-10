@@ -2,6 +2,7 @@ package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
 import de.cubbossa.cliententities.*;
 import de.cubbossa.cliententities.entitydata.ArmorStandDataWrapper;
@@ -32,7 +33,7 @@ public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
   TrackedField<EulerAngle> leftLegPose = new TrackedField<>(new EulerAngle(-1, 0, -1));
 
   public ClientArmorStand(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.ARMOR_STAND);
+    super(playerSpace, entityId, EntityTypes.ARMOR_STAND);
   }
 
   @Override
