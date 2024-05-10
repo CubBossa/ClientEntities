@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class ClientLeashHitch extends ClientEntity implements LeashHitch {
 
   public ClientLeashHitch(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.LEASH_HITCH);
+    super(playerSpace, entityId, EntityType.LEASH_KNOT);
   }
 
   @Override

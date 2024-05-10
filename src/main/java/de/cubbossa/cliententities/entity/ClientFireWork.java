@@ -30,7 +30,7 @@ public class ClientFireWork extends ClientEntity implements Firework {
   boolean detonated = false;
 
   public ClientFireWork(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.FIREWORK);
+    super(playerSpace, entityId, EntityType.FIREWORK_ROCKET);
   }
 
   @Override

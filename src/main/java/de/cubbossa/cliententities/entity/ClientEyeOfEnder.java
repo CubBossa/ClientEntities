@@ -22,7 +22,7 @@ public class ClientEyeOfEnder extends ClientEntity implements EnderSignal {
     TrackedField<@Nullable ItemStack> item = new TrackedField<>();
 
     public ClientEyeOfEnder(PlayerSpaceImpl playerSpace, int entityId) {
-        super(playerSpace, entityId, EntityType.ENDER_SIGNAL);
+        super(playerSpace, entityId, EntityType.EYE_OF_ENDER);
     }
 
     @Override

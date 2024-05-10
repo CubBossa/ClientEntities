@@ -5,9 +5,11 @@ import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.damage.DamageSource;
 import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ClientDamageable extends ClientEntity implements Damageable {
@@ -28,6 +30,11 @@ public class ClientDamageable extends ClientEntity implements Damageable {
 
   public void damage(double amount, @Nullable Entity source) {
     damage(amount);
+  }
+
+  @Override
+  public void damage(double v, @NotNull DamageSource damageSource) {
+    damage(v);
   }
 
   @Override

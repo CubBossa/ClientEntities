@@ -8,9 +8,11 @@ import de.cubbossa.cliententities.TrackedField;
 import org.bukkit.entity.EntityCategory;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public class ClientGuardian extends ClientMob implements Guardian {
 

@@ -42,6 +42,17 @@ public abstract class ClientLivingEntity extends ClientDamageable implements Liv
     super(playerSpace, entityId, entityType);
   }
 
+  @Override
+  public int getItemInUseTicks() {
+    throw new ServerSideMethodNotSupported();
+  }
+
+  @Nullable
+  @Override
+  public ItemStack getItemInUse() {
+    throw new ServerSideMethodNotSupported();
+  }
+
   @Override  @Deprecated
   public double getEyeHeight() {
     throw new ServerSideMethodNotSupported();
@@ -352,6 +363,11 @@ public abstract class ClientLivingEntity extends ClientDamageable implements Liv
 
   public @Nullable Location getBedLocation() {
     return bedLocation.getValue();
+  }
+
+  @Override
+  public void setItemInUseTicks(int i) {
+    throw new ServerSideMethodNotSupported();
   }
 
   public void swingMainHand() {

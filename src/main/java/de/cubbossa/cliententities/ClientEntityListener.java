@@ -7,6 +7,8 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import de.cubbossa.cliententities.entity.ClientEntity;
 import org.bukkit.Bukkit;
+import org.bukkit.damage.DamageSource;
+import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -48,7 +50,7 @@ public class ClientEntityListener extends PacketListenerAbstract {
               target));
           case ATTACK -> {
             playerSpace.callEvent(new EntityDamageByEntityEvent(Bukkit.getPlayer(e.getUser().getUUID()),
-                target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 0));
+                target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, DamageSource.builder(DamageType.MOB_ATTACK).build(), 0));
           }
         }
       });

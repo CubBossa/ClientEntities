@@ -76,6 +76,16 @@ public class ClientDisplay extends ClientEntity implements Display {
   }
 
   @Override
+  public int getTeleportDuration() {
+    return 0;
+  }
+
+  @Override
+  public void setTeleportDuration(int i) {
+
+  }
+
+  @Override
   public float getViewRange() {
     return viewRange.getValue();
   }

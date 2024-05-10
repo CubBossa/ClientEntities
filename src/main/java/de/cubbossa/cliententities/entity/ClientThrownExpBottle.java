@@ -9,6 +9,6 @@ import org.bukkit.inventory.ItemStack;
 public class ClientThrownExpBottle extends ClientThrownItemProjectile implements ThrownExpBottle {
 
     public ClientThrownExpBottle(PlayerSpaceImpl playerSpace, int entityId) {
-        super(playerSpace, entityId, EntityType.THROWN_EXP_BOTTLE, new ItemStack(Material.EXPERIENCE_BOTTLE));
+        super(playerSpace, entityId, EntityType.EXPERIENCE_BOTTLE, new ItemStack(Material.EXPERIENCE_BOTTLE));
     }
 }

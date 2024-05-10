@@ -14,10 +14,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Pose;
-import org.bukkit.entity.SpawnCategory;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.MetadataValue;
@@ -820,6 +817,18 @@ public class ClientEntity implements ClientViewElement, Entity {
     throw new ServerSideMethodNotSupported();
   }
 
+  @NotNull
+  @Override
+  public Set<Player> getTrackedBy() {
+    return null;
+  }
+
+  @Nullable
+  @Override
+  public String getAsString() {
+    return toString();
+  }
+
   @Override
   public void setGlowing(boolean b) {
     setMeta(glowing, b);
@@ -858,6 +867,29 @@ public class ClientEntity implements ClientViewElement, Entity {
   @NotNull
   public SpawnCategory getSpawnCategory() {
     return SpawnCategory.MISC;
+  }
+
+  @Override
+  public boolean isInWorld() {
+    return false;
+  }
+
+  @Nullable
+  @Override
+  public EntitySnapshot createSnapshot() {
+    return null;
+  }
+
+  @NotNull
+  @Override
+  public Entity copy() {
+    return null;
+  }
+
+  @NotNull
+  @Override
+  public Entity copy(@NotNull Location location) {
+    return null;
   }
 
   @NotNull

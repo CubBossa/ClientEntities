@@ -20,7 +20,7 @@ public class ClientEnderCrystal extends ClientEntity implements EnderCrystal {
   TrackedField<@Nullable Location> beamTarget = new TrackedField<>();
 
   public ClientEnderCrystal(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.ENDER_CRYSTAL);
+    super(playerSpace, entityId, EntityType.END_CRYSTAL);
   }
 
   @Override

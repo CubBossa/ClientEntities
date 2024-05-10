@@ -23,7 +23,7 @@ public class ClientItem extends ClientEntity implements Item {
   TrackedField<ItemStack> itemStack = new TrackedField<>(new ItemStack(Material.AIR));
 
   public ClientItem(PlayerSpaceImpl playerSpace, int entityId) {
-    super(playerSpace, entityId, EntityType.DROPPED_ITEM);
+    super(playerSpace, entityId, EntityType.ITEM);
   }
 
   @NotNull

@@ -6,12 +6,19 @@
 
     <groupId>de.cubbossa</groupId>
     <artifactId>ClientEntities</artifactId>
-    <version>1.2.3</version>
+    <version>1.2.4</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus_cubbossa</id>
+            <url>https://nexus.leonardbausenwein.de/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
     <repositories>
         <repository>
@@ -23,6 +30,7 @@
             <url>https://repo.codemc.io/repository/maven-releases/</url>
         </repository>
     </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -59,6 +67,33 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.5.1</version>
+                <executions>
+                    <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <serverId>nexus_cubbossa</serverId>
+                    <nexusUrl>https://nexus.leonardbausenwein.de/repository/maven-releases/</nexusUrl>
+                    <skipStaging>true</skipStaging>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -81,14 +116,14 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.20.1-R0.1-SNAPSHOT</version>
+            <version>1.20.5-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.github.retrooper.packetevents</groupId>
             <artifactId>spigot</artifactId>
-            <version>2.0.2</version>
+            <version>2.3.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

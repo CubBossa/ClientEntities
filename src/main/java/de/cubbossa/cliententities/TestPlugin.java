@@ -47,7 +47,7 @@ public class TestPlugin extends JavaPlugin implements Listener {
       if (args.length > 0) {
         EntityType type = EntityType.valueOf(args[0].toUpperCase());
         switch (type) {
-          case ENDER_SIGNAL -> {
+          case EYE_OF_ENDER -> {
             ClientEyeOfEnder enderSignal = playerSpace.spawn(player.getLocation(), EnderSignal.class);
             enderSignal.setVelocity(new Vector(0.5, 0.5, 0.5).multiply(1_000));
             playerSpace.announce();
@@ -104,7 +104,7 @@ public class TestPlugin extends JavaPlugin implements Listener {
             b.addPassenger(c);
             playerSpace.announce();
           }
-          case FIREWORK -> {
+          case FIREWORK_ROCKET -> {
             ClientFireWork firework = playerSpace.spawn(player.getLocation(), Firework.class);
             ItemStack stack = new ItemStack(Material.FIREWORK_ROCKET);
             FireworkMeta meta = (FireworkMeta) stack.getItemMeta();
@@ -167,7 +167,7 @@ public class TestPlugin extends JavaPlugin implements Listener {
               }
             }, 0, 200);
           }
-          case LEASH_HITCH -> {
+          case LEASH_KNOT -> {
             playerSpace.spawn(player.getLocation(), LeashHitch.class);
             playerSpace.announce();
           }

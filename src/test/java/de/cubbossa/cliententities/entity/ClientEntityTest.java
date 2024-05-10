@@ -1,5 +1,8 @@
 package de.cubbossa.cliententities.entity;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.PacketEventsAPI;
+import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder;
 import org.bukkit.entity.EntityType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,7 @@ class ClientEntityTest {
 
   @Test
   void metaData() {
+    PacketEvents.setAPI(SpigotPacketEventsBuilder.build(null));
     ClientEntity entity = new ClientEntity(null, 1, EntityType.BAT);
     assertEquals(0, entity.metaData().size());
     entity.setGlowing(true);
