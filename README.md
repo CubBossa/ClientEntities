@@ -3,18 +3,41 @@
 A wrapper for the PacketEvents library to easily create client side entities.
 It uses the Spigot API entity classes, so that the general usage is familiar.
 
+## Maven
+
+```xml
+<repository>
+    <id>cubbossa_repository</id>
+    <url>https://nexus.leonardbausenwein.de/repository/maven-releases/</url>
+</repository>
+
+<dependency>
+    <groupId>de.cubbossa</groupId>
+    <artifactId>ClientEntities</artifactId>
+    <version>1.3.1</version>
+</dependency>
+```
+
 ## How to use
 
+### PacketEvents
+
+ClientEntities works on top of [packetevents](https://github.com/retrooper/packetevents/),
+make sure to set it up correctly.
+
+### ClientEntities
+
 Main part of the library is the PlayerSpace class. It resembles a group of players that are supposed to see some client
-side entity action.
+side entity action. It is comparable to Adventure audiences.
+
 If you want two players to see a client item stack hovering above a chest shop, create a PlayerSpace instance for these
 two players with
 ```Java
-PlayerSpace playerSpace = PlayerSpace.create(playerA, playerB);
+PlayerSpace playerSpace = PlayerSpace.create().withPlayers(playerA, playerB).build();
 ```
 
 You should keep the reference to later remove the client entities. Also, whenever you used your PlayerSpace and don't need
-it anymore, call `PlayerSpace#close()` to unregister its listeners.
+it anymore, call `playerSpace.close()` to unregister its listeners.
 
 ### Summoning
 
@@ -23,29 +46,44 @@ which basically means that the method would not have any influence on the client
 are server-side methods.
 
 ```Java 
-DisplayText x = playerSpace.spawn(myLocation, DisplayText.class)
+DisplayText x = playerSpace.spawn(myLocation, DisplayText.class);
 ```
 
 **Valid entities for now are:**
-- TextDisplay
-- BlockDisplay
+- Armor Stand
+- Block Display
+- Thrown Egg
+- Ender Crystal
+- Thrown Ender Pearl
+- Experience Orb
+- Thrown Eye of Ender
+- Falling Block
+- Firework Rocket
+- Guardian
+- Guardian Beam
 - Interaction
+- Dropped Item
+- Item Display
+- Leash Knot
 - Snowball
-- Item
-- Egg
-- EnderPearl
-- ArmorStand
-- FallingBlock
+- Squid
+- Text Display
+- Thrown Experience Bottle
+- Thrown Item (any Texture)
+- Thrown Potion
+- Villager
 
-More will come. If you require one entity in particular, just make an issue and I will add it asap.
+More will come. If you require one entity in particular, just make an issue and I will add it first.
 
 ### Listeners 
 
 There are wrappings for the entity interaction events.
 You can therefore use
+
 ```Java
-ListenerHandler listener = playerSpace.registerListener(PlayerInteractEntityEvent.class, e -> {
-    // do something with the event like with Spigot API
+
+PlayerSpace.Listener<?> listener = playerSpace.registerListener(PlayerInteractEntityEvent.class, e -> {
+  // do something with the event like with Spigot API
 });
 playerSpace.unregisterListener(listener);
 ```
@@ -68,12 +106,12 @@ import org.bukkit.util.Vector;
 import java.util.UUID;
 
 class Fountain {
-  PlayerSpaceImpl playerSpace;
+  PlayerSpace playerSpace;
   Location location;
   Vector direction;
 
   public Fountain(UUID... players) {
-    playerSpace = PlayerSpaceImpl.create(players);
+    playerSpace = PlayerSpace.create().withPlayersById(players).build();
   }
 
   void play() {
@@ -127,7 +165,7 @@ class Fountain {
     fountain.setPersistent(false);
     fountain.setVisibleByDefault(false);
     fountain.setVelocity(direction);
-    playerSpace.announce(fountain);
+    fountain.setCancelDrop(true);
     for (Player online : Bukkit.getOnlinePlayers()) {
       if (!players.contains(online.getUniqueId())) {
         continue;
@@ -147,4 +185,3 @@ class Fountain {
 - Tons of entities can influence the TPS drastically
 
 
-## How to build

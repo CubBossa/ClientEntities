@@ -8,22 +8,78 @@ import de.cubbossa.cliententities.entity.ClientPlayer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.plugin.Plugin;
 
 public interface PlayerSpace extends Closeable {
 
-  static Builder builder() {
+  /**
+   * Creates a new PlayerSpace builder.
+   * <br>
+   * Use {@link #close()} to remove this PlayerSpace without remaining client entities or listeners.
+   *
+   * @param players The players to initially add to the PlayerSpace. Players can be added later.
+   * @return a builder that will construct the PlayerSpace.
+   */
+  static Builder create(Collection<UUID> players) {
+    return new Builder().withPlayersByID(players);
+  }
+
+  /**
+   * Creates a new PlayerSpace builder.
+   * <br>
+   * Use {@link #close()} to remove this PlayerSpace without remaining client entities or listeners.
+   *
+   * @return a builder that will construct the PlayerSpace.
+   */
+  static Builder create() {
     return new Builder();
+  }
+
+  /**
+   * Creates a new PlayerSpace with all online players. Whenever a player joins or quits, the PlayerSpace will be updated.
+   * <br>
+   * Use {@link #close()} to remove this PlayerSpace without remaining client entities or listeners.
+   *
+   * @param plugin Your plugin to register the according join and quit event on.
+   * @return a builder that will construct a global PlayerSpace.
+   */
+  static Builder createGlobal(Plugin plugin) {
+    return new Builder() {
+      public PlayerSpaceImpl build() {
+        if (period >= 1) {
+          Timer timer = new Timer();
+          PlayerSpaceImpl playerSpace = new GlobalPlayerSpace(plugin, events) {
+            @Override
+            public void close() throws IOException {
+              super.close();
+              timer.cancel();
+            }
+          };
+          timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+              playerSpace.announce();
+            }
+          }, period, period);
+          return playerSpace;
+        }
+        return new GlobalPlayerSpace(plugin, events);
+      }
+    };
   }
 
   // Members
