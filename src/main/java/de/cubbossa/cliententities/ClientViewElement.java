@@ -1,7 +1,6 @@
 package de.cubbossa.cliententities;
 
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
-
 import java.util.List;
 
 public interface ClientViewElement {

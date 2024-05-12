@@ -1,8 +1,8 @@
 package de.cubbossa.cliententities;
 
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.annotation.concurrent.ThreadSafe;
 
 @ThreadSafe
 public class EntityIdProvider implements EntityIdGenerator {

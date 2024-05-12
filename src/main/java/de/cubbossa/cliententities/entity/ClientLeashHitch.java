@@ -3,7 +3,6 @@ package de.cubbossa.cliententities.entity;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import org.bukkit.block.BlockFace;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LeashHitch;
 import org.jetbrains.annotations.NotNull;
 

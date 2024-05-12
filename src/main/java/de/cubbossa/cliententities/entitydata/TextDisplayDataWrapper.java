@@ -3,9 +3,8 @@ package de.cubbossa.cliententities.entitydata;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
+import java.awt.Color;
 import net.kyori.adventure.text.Component;
-
-import java.awt.*;
 
 public class TextDisplayDataWrapper extends DisplayDataWrapper {
 

@@ -2,12 +2,10 @@ package de.cubbossa.cliententities.entity;
 
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
+import java.util.Objects;
 import org.bukkit.Location;
-import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Objects;
 
 public class ClientGuardianBeam extends ClientGuardian {
 

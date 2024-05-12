@@ -1,18 +1,24 @@
 package de.cubbossa.cliententities;
 
-import de.cubbossa.cliententities.entity.*;
+import de.cubbossa.cliententities.entity.ClientEntity;
+import de.cubbossa.cliententities.entity.ClientExperienceOrb;
+import de.cubbossa.cliententities.entity.ClientFallingBlock;
+import de.cubbossa.cliententities.entity.ClientGuardianBeam;
+import de.cubbossa.cliententities.entity.ClientPlayer;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.UUID;
+import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-
-import javax.annotation.Nullable;
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
 
 public interface PlayerSpace extends Closeable {
 

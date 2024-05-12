@@ -1,21 +1,21 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
 import de.cubbossa.cliententities.entitydata.DisplayDataWrapper;
+import java.util.List;
 import org.bukkit.Color;
 import org.bukkit.entity.Display;
 import org.bukkit.util.Transformation;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
-
-import java.util.List;
+import org.joml.AxisAngle4f;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class ClientDisplay extends ClientEntity implements Display {
 

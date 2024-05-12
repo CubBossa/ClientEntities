@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataType;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 
 public abstract class AbstractEntityDataWrapper extends EntityData {
 

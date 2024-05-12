@@ -7,12 +7,11 @@ import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import java.util.List;
+import java.util.Optional;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderCrystal;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Optional;
 
 public class ClientEnderCrystal extends ClientEntity implements EnderCrystal {
 

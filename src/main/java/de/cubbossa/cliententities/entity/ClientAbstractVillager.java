@@ -6,13 +6,14 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
-import org.bukkit.entity.*;
+import java.util.List;
+import org.bukkit.entity.AbstractVillager;
+import org.bukkit.entity.EntityCategory;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.MerchantRecipe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ClientAbstractVillager extends ClientAgeableMob implements AbstractVillager {
 

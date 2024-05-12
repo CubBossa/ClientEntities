@@ -6,16 +6,13 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
-import lombok.Getter;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderSignal;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ClientEyeOfEnder extends ClientEntity implements EnderSignal {
 

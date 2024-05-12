@@ -1,6 +1,7 @@
 package de.cubbossa.cliententities;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TrackedMask {
 

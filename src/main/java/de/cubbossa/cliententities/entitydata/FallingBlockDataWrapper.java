@@ -3,7 +3,6 @@ package de.cubbossa.cliententities.entitydata;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
-import com.github.retrooper.packetevents.protocol.item.ItemStack;
 import com.github.retrooper.packetevents.protocol.world.Location;
 
 public class FallingBlockDataWrapper extends EntityDataWrapper {

@@ -5,9 +5,8 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.util.Quaternion4f;
 import com.github.retrooper.packetevents.util.Vector3f;
+import java.awt.Color;
 import org.bukkit.entity.Display;
-
-import java.awt.*;
 
 public class DisplayDataWrapper extends EntityDataWrapper {
 

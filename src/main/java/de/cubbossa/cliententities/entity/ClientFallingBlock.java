@@ -1,12 +1,10 @@
 package de.cubbossa.cliententities.entity;
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.FallingBlock;

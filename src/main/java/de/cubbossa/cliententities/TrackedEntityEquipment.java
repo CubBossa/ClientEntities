@@ -1,6 +1,8 @@
 package de.cubbossa.cliententities;
 
 import de.cubbossa.cliententities.entity.ClientLivingEntity;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.inventory.EntityEquipment;
@@ -8,9 +10,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Getter
 @Setter

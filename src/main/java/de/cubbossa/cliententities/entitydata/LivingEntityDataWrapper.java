@@ -4,10 +4,9 @@ import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.world.Location;
-import org.jetbrains.annotations.Nullable;
-
-import java.awt.*;
+import java.awt.Color;
 import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 public class LivingEntityDataWrapper {
 

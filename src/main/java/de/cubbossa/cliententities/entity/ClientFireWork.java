@@ -8,10 +8,11 @@ import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import java.util.List;
+import java.util.Optional;
 import org.bukkit.Bukkit;
 import org.bukkit.EntityEffect;
 import org.bukkit.Material;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -19,9 +20,6 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.projectiles.ProjectileSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
-import java.util.Optional;
 
 public class ClientFireWork extends ClientEntity implements Firework {
 

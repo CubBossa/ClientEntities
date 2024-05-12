@@ -1,19 +1,14 @@
 package de.cubbossa.cliententities.entity;
 
-import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnExperienceOrb;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
-import org.bukkit.Location;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.Player;
-
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import org.bukkit.Location;
+import org.bukkit.entity.ExperienceOrb;
 
 public class ClientExperienceOrb extends ClientEntity implements ExperienceOrb {
 

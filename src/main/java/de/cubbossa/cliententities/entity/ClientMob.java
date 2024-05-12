@@ -6,13 +6,12 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
+import java.util.List;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.loot.LootTable;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public abstract class ClientMob extends ClientLivingEntity implements Mob {
 

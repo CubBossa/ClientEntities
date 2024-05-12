@@ -6,13 +6,11 @@ import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.TrackedField;
 import de.cubbossa.cliententities.entitydata.BlockDisplayDataWrapper;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
-import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 public class ClientBlockDisplay extends ClientDisplay implements BlockDisplay {
 

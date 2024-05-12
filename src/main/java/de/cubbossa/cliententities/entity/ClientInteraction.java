@@ -1,18 +1,15 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedBoolField;
 import de.cubbossa.cliententities.TrackedField;
 import de.cubbossa.cliententities.entitydata.InteractionDataWrapper;
-import org.bukkit.entity.EntityType;
+import java.util.List;
 import org.bukkit.entity.Interaction;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ClientInteraction extends ClientEntity implements Interaction {
 

@@ -1,21 +1,22 @@
 package de.cubbossa.cliententities.entity;
 
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
-import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes;
 import com.github.retrooper.packetevents.util.Vector3f;
-import de.cubbossa.cliententities.*;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.ServerSideMethodNotSupported;
+import de.cubbossa.cliententities.TrackedBoolField;
+import de.cubbossa.cliententities.TrackedField;
+import de.cubbossa.cliententities.TrackedMask;
 import de.cubbossa.cliententities.entitydata.ArmorStandDataWrapper;
+import java.util.List;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityCategory;
-import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.EulerAngle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ClientArmorStand extends ClientLivingEntity implements ArmorStand {
 

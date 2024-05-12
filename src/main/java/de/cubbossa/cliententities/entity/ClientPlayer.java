@@ -7,23 +7,36 @@ import com.github.retrooper.packetevents.protocol.player.UserProfile;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerInfoUpdate;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnPlayer;
-import de.cubbossa.cliententities.*;
+import de.cubbossa.cliententities.PlayerSpaceImpl;
+import de.cubbossa.cliententities.ServerSideMethodNotSupported;
+import de.cubbossa.cliententities.TrackedBoolField;
+import de.cubbossa.cliententities.TrackedField;
+import de.cubbossa.cliententities.TrackedMask;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import net.kyori.adventure.text.Component;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityCategory;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Pose;
+import org.bukkit.entity.Villager;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.MainHand;
+import org.bukkit.inventory.Merchant;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.profile.PlayerProfile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
 
 public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
 

@@ -7,16 +7,16 @@ import com.github.retrooper.packetevents.protocol.entity.villager.VillagerData;
 import de.cubbossa.cliententities.PlayerSpaceImpl;
 import de.cubbossa.cliententities.ServerSideMethodNotSupported;
 import de.cubbossa.cliententities.TrackedField;
-import lombok.Getter;
+import java.util.List;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Pose;
+import org.bukkit.entity.Villager;
+import org.bukkit.entity.ZombieVillager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class ClientVillager extends ClientAbstractVillager implements Villager {
 
