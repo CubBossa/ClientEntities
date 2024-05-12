@@ -56,7 +56,7 @@ public class TestPlugin extends JavaPlugin implements Listener {
   @Override
   public void onEnable() {
     PacketEvents.getAPI().init();
-    playerSpace = PlayerSpace.builder().build();
+    playerSpace = PlayerSpace.createGlobal(this).build();
     Bukkit.getPluginManager().registerEvents(this, this);
 
     getCommand("cliententities").setExecutor((sender, cmd, s, args) -> {
