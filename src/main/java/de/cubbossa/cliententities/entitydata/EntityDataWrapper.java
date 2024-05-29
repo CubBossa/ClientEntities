@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose;
+import java.util.Map;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
@@ -175,5 +176,17 @@ public class EntityDataWrapper {
         return 7;
       }
     };
+  }
+
+  protected static int index(ServerVersion version, Map<ServerVersion, Integer> mapping) {
+    int index = -1;
+    for (Map.Entry<ServerVersion, Integer> e : mapping.entrySet()) {
+      if (version.isNewerThanOrEquals(e.getKey())) {
+        index = e.getValue();
+      } else {
+        return index;
+      }
+    }
+    return index;
   }
 }
