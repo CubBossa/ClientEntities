@@ -69,22 +69,26 @@ public class PlayerSpaceImpl implements PlayerSpace {
   public static BiMap<Class<? extends Entity>, Class<? extends ClientEntity>> classConversion = HashBiMap.create();
 
   static {
-    classConversion.put(ArmorStand.class, ClientArmorStand.class);
-    classConversion.put(BlockDisplay.class, ClientBlockDisplay.class);
-    classConversion.put(TextDisplay.class, ClientTextDisplay.class);
-    classConversion.put(Interaction.class, ClientInteraction.class);
-    classConversion.put(Squid.class, ClientSquid.class);
-    classConversion.put(EnderPearl.class, ClientEnderPearl.class);
-    classConversion.put(Firework.class, ClientFireWork.class);
-    classConversion.put(EnderSignal.class, ClientEyeOfEnder.class);
-    classConversion.put(ItemDisplay.class, ClientItemDisplay.class);
-    classConversion.put(Egg.class, ClientEgg.class);
-    classConversion.put(ThrownExpBottle.class, ClientThrownExpBottle.class);
-    classConversion.put(ThrownPotion.class, ClientThrownPotion.class);
-    classConversion.put(FallingBlock.class, ClientFallingBlock.class);
-    classConversion.put(Snowball.class, ClientSnowball.class);
-    classConversion.put(Villager.class, ClientVillager.class);
-    classConversion.put(LeashHitch.class, ClientLeashHitch.class);
+    // Try for all that exist in the current context. E.g. BlockDisplay may not load.
+    try {
+      classConversion.put(ArmorStand.class, ClientArmorStand.class);
+      classConversion.put(BlockDisplay.class, ClientBlockDisplay.class);
+      classConversion.put(TextDisplay.class, ClientTextDisplay.class);
+      classConversion.put(Interaction.class, ClientInteraction.class);
+      classConversion.put(Squid.class, ClientSquid.class);
+      classConversion.put(EnderPearl.class, ClientEnderPearl.class);
+      classConversion.put(Firework.class, ClientFireWork.class);
+      classConversion.put(EnderSignal.class, ClientEyeOfEnder.class);
+      classConversion.put(ItemDisplay.class, ClientItemDisplay.class);
+      classConversion.put(Egg.class, ClientEgg.class);
+      classConversion.put(ThrownExpBottle.class, ClientThrownExpBottle.class);
+      classConversion.put(ThrownPotion.class, ClientThrownPotion.class);
+      classConversion.put(FallingBlock.class, ClientFallingBlock.class);
+      classConversion.put(Snowball.class, ClientSnowball.class);
+      classConversion.put(Villager.class, ClientVillager.class);
+      classConversion.put(LeashHitch.class, ClientLeashHitch.class);
+    } catch (Throwable ignored) {
+    }
   }
 
   EntityIdGenerator entityIdGenerator = EntityIdProvider.get();

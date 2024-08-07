@@ -1,8 +1,10 @@
 package de.cubbossa.cliententities;
 
+import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketListenerPriority;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.manager.server.ServerVersion;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import de.cubbossa.cliententities.entity.ClientEntity;
@@ -42,13 +44,23 @@ public class ClientEntityListener extends PacketListenerAbstract {
           case INTERACT_AT -> {
             Vector at = wrapper.getTarget().map(v -> new Vector(v.x, v.y, v.z)).orElse(null);
             playerSpace.callEvent(new PlayerInteractAtEntityEvent(Bukkit.getPlayer(e.getUser().getUUID()),
-                target, at));
+            target, at));
           }
           case INTERACT -> playerSpace.callEvent(new PlayerInteractEntityEvent(Bukkit.getPlayer(e.getUser().getUUID()),
-              target));
+          target));
           case ATTACK -> {
-            playerSpace.callEvent(new EntityDamageByEntityEvent(Bukkit.getPlayer(e.getUser().getUUID()),
-                target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, DamageSource.builder(DamageType.MOB_ATTACK).build(), 0));
+            try {
+                playerSpace.callEvent(new EntityDamageByEntityEvent(
+                Bukkit.getPlayer(e.getUser().getUUID()),
+                target, EntityDamageEvent.DamageCause.ENTITY_ATTACK,
+                DamageSource.builder(DamageType.MOB_ATTACK).build(), 0
+                ));
+            } catch (NoClassDefFoundError ex) {
+              playerSpace.callEvent(new EntityDamageByEntityEvent(
+              Bukkit.getPlayer(e.getUser().getUUID()),
+              target, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 0
+              ));
+            }
           }
         }
       });

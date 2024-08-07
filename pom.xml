@@ -6,7 +6,7 @@
 
     <groupId>de.cubbossa</groupId>
     <artifactId>ClientEntities</artifactId>
-    <version>1.3.3</version>
+    <version>1.3.5</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
