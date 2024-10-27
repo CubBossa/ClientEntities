@@ -138,6 +138,11 @@ public abstract class ClientLivingEntity extends ClientDamageable implements Liv
     throw new ServerSideMethodNotSupported();
   }
 
+  @Override
+  public void setRiptiding(boolean b) {
+    pose.setValue(Pose.SPIN_ATTACK);
+  }
+
   @Override  @Deprecated
   public int getMaximumAir() {
     throw new ServerSideMethodNotSupported();

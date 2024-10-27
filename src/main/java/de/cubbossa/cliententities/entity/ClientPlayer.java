@@ -291,6 +291,11 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
 
   }
 
+  @Override
+  public void startRiptideAttack(int i, float v, @Nullable ItemStack itemStack) {
+
+  }
+
   @NotNull
   @Override
   public GameMode getGameMode() {
@@ -314,6 +319,11 @@ public class ClientPlayer extends ClientLivingEntity implements HumanEntity {
   @Nullable
   public ItemStack getItemInUse() {
     return isHandActive.getBooleanValue() ? null : equipment.getItemInMainHand();
+  }
+
+  @Override
+  public void setRiptiding(boolean b) {
+
   }
 
   @Override
